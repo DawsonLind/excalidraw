@@ -45,6 +45,7 @@ import type {
   ExcalidrawEmbeddableElement,
   ExcalidrawFrameLikeElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHeartElement,
   ExcalidrawIframeElement,
   ExcalidrawImageElement,
   ExcalidrawLinearElement,
@@ -111,6 +112,126 @@ type RectangularElement =
   | ExcalidrawIframeElement
   | ExcalidrawTextElement
   | ExcalidrawSelectionElement;
+
+const HEART_SAMPLES_PER_CURVE = 12;
+
+const getHeartControlPoints = (
+  element: ExcalidrawHeartElement,
+  offset = 0,
+) => {
+  const x = element.x - offset;
+  const y = element.y - offset;
+  const width = element.width + offset * 2;
+  const height = element.height + offset * 2;
+  const centerX = x + width / 2;
+  const bottom = y + height;
+
+  return {
+    start: pointFrom(centerX, bottom),
+    left: [
+      pointFrom(x - width * 0.08, y + height * 0.62),
+      pointFrom(x + width * 0.02, y + height * 0.12),
+      pointFrom(centerX, y + height * 0.28),
+    ],
+    right: [
+      pointFrom(x + width * 0.98, y + height * 0.12),
+      pointFrom(x + width * 1.08, y + height * 0.62),
+      pointFrom(centerX, bottom),
+    ],
+  };
+};
+
+const cubicPoint = <Point extends GlobalPoint | LocalPoint>(
+  p0: Point,
+  p1: Point,
+  p2: Point,
+  p3: Point,
+  t: number,
+): Point => {
+  const mt = 1 - t;
+  return pointFrom(
+    mt ** 3 * p0[0] +
+      3 * mt ** 2 * t * p1[0] +
+      3 * mt * t ** 2 * p2[0] +
+      t ** 3 * p3[0],
+    mt ** 3 * p0[1] +
+      3 * mt ** 2 * t * p1[1] +
+      3 * mt * t ** 2 * p2[1] +
+      t ** 3 * p3[1],
+  );
+};
+
+export const getHeartPath = (
+  element: Pick<ExcalidrawHeartElement, "width" | "height">,
+): string => {
+  const width = Math.max(1, element.width);
+  const height = Math.max(1, element.height);
+  const centerX = width / 2;
+
+  return [
+    `M ${centerX} ${height}`,
+    `C ${-width * 0.08} ${height * 0.62}, ${width * 0.02} ${
+      height * 0.12
+    }, ${centerX} ${height * 0.28}`,
+    `C ${width * 0.98} ${height * 0.12}, ${width * 1.08} ${
+      height * 0.62
+    }, ${centerX} ${height}`,
+    "Z",
+  ].join(" ");
+};
+
+export const getHeartPoints = <Point extends GlobalPoint | LocalPoint>(
+  element: ExcalidrawHeartElement,
+  offset = 0,
+): Point[] => {
+  const { start, left, right } = getHeartControlPoints(element, offset);
+  const points: Point[] = [start as Point];
+
+  for (let i = 1; i <= HEART_SAMPLES_PER_CURVE; i++) {
+    points.push(
+      cubicPoint(
+        start as Point,
+        left[0] as Point,
+        left[1] as Point,
+        left[2] as Point,
+        i / HEART_SAMPLES_PER_CURVE,
+      ),
+    );
+  }
+
+  for (let i = 1; i <= HEART_SAMPLES_PER_CURVE; i++) {
+    points.push(
+      cubicPoint(
+        left[2] as Point,
+        right[0] as Point,
+        right[1] as Point,
+        right[2] as Point,
+        i / HEART_SAMPLES_PER_CURVE,
+      ),
+    );
+  }
+
+  return points;
+};
+
+export const getHeartShape = <Point extends GlobalPoint | LocalPoint>(
+  element: ExcalidrawHeartElement,
+): GeometricShape<Point> => {
+  const center: Point = pointFrom(
+    element.x + element.width / 2,
+    element.y + element.height / 2,
+  );
+  const data = polygonFromPoints(
+    getHeartPoints<Point>(element).map((point) =>
+      pointRotateRads(point, center, element.angle),
+    ),
+  );
+
+  return {
+    type: "polygon",
+    data,
+  };
+};
 
 // polygon
 export const getPolygonShape = <Point extends GlobalPoint | LocalPoint>(

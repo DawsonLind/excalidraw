@@ -83,6 +83,7 @@ describe("getToolbarTools()", () => {
 
     expect(toolValues.filter((value) => value === "selection")).toHaveLength(1);
     expect(toolValues.filter((value) => value === "lasso")).toHaveLength(0);
+    expect(toolValues).toContain("heart");
   });
 
   it("replaces selection with lasso when lasso is preferred", () => {

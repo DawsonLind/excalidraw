@@ -17,6 +17,7 @@ import {
   ellipse,
   ellipseSegmentInterceptPoints,
 } from "@excalidraw/math/ellipse";
+import { getHeartPoints } from "@excalidraw/utils/shape";
 
 import type {
   Curve,
@@ -71,6 +72,7 @@ import type {
   ExcalidrawElement,
   ExcalidrawEllipseElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHeartElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
   NonDeleted,
@@ -471,6 +473,14 @@ export const intersectElementWithLineSegment = (
         offset,
         onlyFirst,
       );
+    case "heart":
+      return intersectHeartWithLineSegment(
+        element,
+        elementsMap,
+        line,
+        offset,
+        onlyFirst,
+      );
     case "ellipse":
       return intersectEllipseWithLineSegment(
         element,
@@ -705,6 +715,33 @@ const intersectDiamondWithLineSegment = (
   );
 
   return intersections;
+};
+
+const intersectHeartWithLineSegment = (
+  element: ExcalidrawHeartElement,
+  elementsMap: ElementsMap,
+  l: LineSegment<GlobalPoint>,
+  offset: number = 0,
+  onlyFirst = false,
+): GlobalPoint[] => {
+  const center = elementCenterPoint(element, elementsMap);
+  const rotatedA = pointRotateRads(l[0], center, -element.angle as Radians);
+  const rotatedB = pointRotateRads(l[1], center, -element.angle as Radians);
+  const rotatedIntersector = lineSegment(rotatedA, rotatedB);
+  const points = getHeartPoints<GlobalPoint>(element, offset);
+  const sides = points.map((point, index) =>
+    lineSegment(point, points[(index + 1) % points.length]),
+  );
+  const intersections: GlobalPoint[] = [];
+
+  return lineIntersections(
+    sides,
+    rotatedIntersector,
+    intersections,
+    center,
+    element.angle,
+    onlyFirst,
+  );
 };
 
 /**

@@ -1,8 +1,10 @@
 import {
   curvePointDistance,
   distanceToLineSegment,
+  lineSegment,
   pointRotateRads,
 } from "@excalidraw/math";
+import { getHeartPoints } from "@excalidraw/utils/shape";
 
 import { ellipse, ellipseDistanceFromPoint } from "@excalidraw/math/ellipse";
 
@@ -22,6 +24,7 @@ import type {
   ExcalidrawElement,
   ExcalidrawEllipseElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHeartElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
 } from "./types";
@@ -43,6 +46,8 @@ export const distanceToElement = (
       return distanceToRectanguloidElement(element, elementsMap, p);
     case "diamond":
       return distanceToDiamondElement(element, elementsMap, p);
+    case "heart":
+      return distanceToHeartElement(element, elementsMap, p);
     case "ellipse":
       return distanceToEllipseElement(element, elementsMap, p);
     case "line":
@@ -108,6 +113,21 @@ const distanceToDiamondElement = (
       .map((a) => curvePointDistance(a, rotatedPoint))
       .filter((d): d is number => d !== null),
   );
+};
+
+const distanceToHeartElement = (
+  element: ExcalidrawHeartElement,
+  elementsMap: ElementsMap,
+  p: GlobalPoint,
+): number => {
+  const center = elementCenterPoint(element, elementsMap);
+  const rotatedPoint = pointRotateRads(p, center, -element.angle as Radians);
+  const points = getHeartPoints<GlobalPoint>(element);
+  const sides = points.map((point, index) =>
+    lineSegment(point, points[(index + 1) % points.length]),
+  );
+
+  return Math.min(...sides.map((side) => distanceToLineSegment(rotatedPoint, side)));
 };
 
 /**

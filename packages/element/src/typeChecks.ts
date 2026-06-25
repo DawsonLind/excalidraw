@@ -183,6 +183,7 @@ export const isBindableElement = (
     (!element.locked || includeLocked === true) &&
     (element.type === "rectangle" ||
       element.type === "diamond" ||
+      element.type === "heart" ||
       element.type === "ellipse" ||
       element.type === "image" ||
       element.type === "iframe" ||
@@ -200,6 +201,7 @@ export const isRectanguloidElement = (
     element != null &&
     (element.type === "rectangle" ||
       element.type === "diamond" ||
+      element.type === "heart" ||
       element.type === "image" ||
       element.type === "iframe" ||
       element.type === "embeddable" ||
@@ -251,6 +253,7 @@ export const isExcalidrawElement = (
   switch (type) {
     case "text":
     case "diamond":
+    case "heart":
     case "rectangle":
     case "iframe":
     case "embeddable":
@@ -397,6 +400,7 @@ export const isEligibleFrameChildType = (type: ElementOrToolType) => {
   switch (type) {
     case "rectangle":
     case "diamond":
+    case "heart":
     case "ellipse":
     case "arrow":
     case "line":
