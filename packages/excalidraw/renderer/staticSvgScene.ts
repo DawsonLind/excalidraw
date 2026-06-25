@@ -148,57 +148,69 @@ const renderElementToSvg = (
     case "rectangle":
     case "diamond":
     case "ellipse": {
-      const shape = ShapeCache.generateElementShape(element, renderConfig);
-      const node = roughSVGDrawWithPrecision(
-        rsvg,
-        shape,
-        MAX_DECIMALS_FOR_SVG_EXPORT,
-      );
-      if (opacity !== 1) {
-        node.setAttribute("stroke-opacity", `${opacity}`);
-        node.setAttribute("fill-opacity", `${opacity}`);
-      }
-      node.setAttribute("stroke-linecap", "round");
-      node.setAttribute(
-        "transform",
-        `translate(${offsetX || 0} ${
-          offsetY || 0
-        }) rotate(${degree} ${cx} ${cy})`,
+      const group = svgRoot.ownerDocument.createElementNS(SVG_NS, "g");
+      group.setAttribute("stroke-linecap", "round");
+
+      ShapeCache.generateElementShape(element, renderConfig).forEach(
+        (shape) => {
+          const node = roughSVGDrawWithPrecision(
+            rsvg,
+            shape,
+            MAX_DECIMALS_FOR_SVG_EXPORT,
+          );
+          if (opacity !== 1) {
+            node.setAttribute("stroke-opacity", `${opacity}`);
+            node.setAttribute("fill-opacity", `${opacity}`);
+          }
+          node.setAttribute(
+            "transform",
+            `translate(${offsetX || 0} ${
+              offsetY || 0
+            }) rotate(${degree} ${cx} ${cy})`,
+          );
+          group.appendChild(node);
+        },
       );
 
       const g = maybeWrapNodesInFrameClipPath(
         element,
         root,
-        [node],
+        [group],
         renderConfig.frameRendering,
         elementsMap,
       );
 
-      addToRoot(g || node, element);
+      addToRoot(g || group, element);
       break;
     }
     case "iframe":
     case "embeddable": {
       // render placeholder rectangle
-      const shape = ShapeCache.generateElementShape(element, renderConfig);
-      const node = roughSVGDrawWithPrecision(
-        rsvg,
-        shape,
-        MAX_DECIMALS_FOR_SVG_EXPORT,
-      );
+      const group = svgRoot.ownerDocument.createElementNS(SVG_NS, "g");
+      group.setAttribute("stroke-linecap", "round");
       const opacity = element.opacity / 100;
-      if (opacity !== 1) {
-        node.setAttribute("stroke-opacity", `${opacity}`);
-        node.setAttribute("fill-opacity", `${opacity}`);
-      }
-      node.setAttribute("stroke-linecap", "round");
-      node.setAttribute(
-        "transform",
-        `translate(${offsetX || 0} ${
-          offsetY || 0
-        }) rotate(${degree} ${cx} ${cy})`,
+
+      ShapeCache.generateElementShape(element, renderConfig).forEach(
+        (shape) => {
+          const node = roughSVGDrawWithPrecision(
+            rsvg,
+            shape,
+            MAX_DECIMALS_FOR_SVG_EXPORT,
+          );
+          if (opacity !== 1) {
+            node.setAttribute("stroke-opacity", `${opacity}`);
+            node.setAttribute("fill-opacity", `${opacity}`);
+          }
+          node.setAttribute(
+            "transform",
+            `translate(${offsetX || 0} ${
+              offsetY || 0
+            }) rotate(${degree} ${cx} ${cy})`,
+          );
+          group.appendChild(node);
+        },
       );
-      addToRoot(node, element);
+      addToRoot(group, element);
 
       const label: ExcalidrawElement =
         createPlaceholderEmbeddableLabel(element);

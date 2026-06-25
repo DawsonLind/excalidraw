@@ -100,6 +100,7 @@ import {
   ArrowheadNoneIcon,
   StrokeStyleDashedIcon,
   StrokeStyleDottedIcon,
+  StrokeStyleDoubleIcon,
   TextAlignTopIcon,
   TextAlignBottomIcon,
   TextAlignMiddleIcon,
@@ -803,6 +804,11 @@ export const actionChangeStrokeStyle = register<
               value: "dotted",
               text: t("labels.strokeStyle_dotted"),
               icon: StrokeStyleDottedIcon,
+            },
+            {
+              value: "double",
+              text: t("labels.strokeStyle_double"),
+              icon: StrokeStyleDoubleIcon,
             },
           ]}
           value={getFormValue(

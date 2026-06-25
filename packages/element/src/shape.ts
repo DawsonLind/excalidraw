@@ -169,6 +169,119 @@ const getDashArrayDashed = (strokeWidth: number) => [8, 8 + strokeWidth];
 
 const getDashArrayDotted = (strokeWidth: number) => [1.5, 6 + strokeWidth];
 
+const getDoubleStrokeOffset = (strokeWidth: number) =>
+  Math.max(4, strokeWidth * 2);
+
+const getBoundedDoubleStrokeInset = (element: ExcalidrawElement) =>
+  Math.min(
+    getDoubleStrokeOffset(element.strokeWidth),
+    Math.max(0, Math.min(element.width, element.height) / 3),
+  );
+
+const getStrokeOnlyOptions = (options: Options): Options => ({
+  ...options,
+  fill: undefined,
+  fillStyle: undefined,
+});
+
+const getDoubleStrokeOptions = (
+  element: ExcalidrawElement,
+  continuousPath: boolean,
+  isDarkMode: boolean,
+) =>
+  getStrokeOnlyOptions(
+    generateRoughOptions(element, continuousPath, isDarkMode),
+  );
+
+const getRoundedRectPath = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) =>
+  `M ${x + radius} ${y} L ${x + width - radius} ${y} Q ${x + width} ${y}, ${
+    x + width
+  } ${y + radius} L ${x + width} ${y + height - radius} Q ${x + width} ${
+    y + height
+  }, ${x + width - radius} ${y + height} L ${x + radius} ${y + height} Q ${x} ${
+    y + height
+  }, ${x} ${y + height - radius} L ${x} ${y + radius} Q ${x} ${y}, ${
+    x + radius
+  } ${y}`;
+
+const getDiamondPointsFromBounds = (width: number, height: number, inset = 0) =>
+  [
+    Math.floor(width / 2) + 1,
+    inset,
+    width - inset,
+    Math.floor(height / 2) + 1,
+    Math.floor(width / 2) + 1,
+    height - inset,
+    inset,
+    Math.floor(height / 2) + 1,
+  ] as const;
+
+const getRoundedDiamondPath = (
+  topX: number,
+  topY: number,
+  rightX: number,
+  rightY: number,
+  bottomX: number,
+  bottomY: number,
+  leftX: number,
+  leftY: number,
+  verticalRadius: number,
+  horizontalRadius: number,
+) =>
+  `M ${topX + verticalRadius} ${topY + horizontalRadius} L ${
+    rightX - verticalRadius
+  } ${rightY - horizontalRadius}
+    C ${rightX} ${rightY}, ${rightX} ${rightY}, ${rightX - verticalRadius} ${
+    rightY + horizontalRadius
+  }
+    L ${bottomX + verticalRadius} ${bottomY - horizontalRadius}
+    C ${bottomX} ${bottomY}, ${bottomX} ${bottomY}, ${
+    bottomX - verticalRadius
+  } ${bottomY - horizontalRadius}
+    L ${leftX + verticalRadius} ${leftY + horizontalRadius}
+    C ${leftX} ${leftY}, ${leftX} ${leftY}, ${leftX + verticalRadius} ${
+    leftY - horizontalRadius
+  }
+    L ${topX - verticalRadius} ${topY + horizontalRadius}
+    C ${topX} ${topY}, ${topX} ${topY}, ${topX + verticalRadius} ${
+    topY + horizontalRadius
+  }`;
+
+const getPointOffset = (
+  points: readonly LocalPoint[],
+  offset: number,
+): [number, number] => {
+  for (let index = 1; index < points.length; index++) {
+    const [prevX, prevY] = points[index - 1];
+    const [nextX, nextY] = points[index];
+    const distance = Math.hypot(nextX - prevX, nextY - prevY);
+
+    if (distance > 0) {
+      return [
+        (-(nextY - prevY) / distance) * offset,
+        ((nextX - prevX) / distance) * offset,
+      ];
+    }
+  }
+
+  return [0, offset];
+};
+
+const getOffsetPoints = (
+  points: readonly LocalPoint[],
+  offset: number,
+): RoughPoint[] => {
+  const [offsetX, offsetY] = getPointOffset(points, offset);
+
+  return points.map(([x, y]) => [x + offsetX, y + offsetY]);
+};
+
 function adjustRoughness(element: ExcalidrawElement): number {
   const roughness = element.roughness;
 
@@ -206,7 +319,7 @@ export const generateRoughOptions = (
         ? getDashArrayDotted(element.strokeWidth)
         : undefined,
     // for non-solid strokes, disable multiStroke because it tends to make
-    // dashes/dots overlay each other
+    // dashes/dots and double outlines overlay each other
     disableMultiStroke: element.strokeStyle !== "solid",
     // for non-solid strokes, increase the width a bit to make it visually
     // similar to solid strokes, because we're also disabling multiStroke
@@ -770,51 +883,74 @@ const _generateElementShape = (
     case "rectangle":
     case "iframe":
     case "embeddable": {
-      let shape: ElementShapes[typeof element.type];
+      const shapes: ElementShapes[typeof element.type] = [];
       // this is for rendering the stroke/bg of the embeddable, especially
       // when the src url is not set
+      const roughElement = modifyIframeLikeForRoughOptions(
+        element,
+        isExporting,
+        embedsValidationStatus,
+      );
 
       if (element.roundness) {
         const w = element.width;
         const h = element.height;
         const r = getCornerRadius(Math.min(w, h), element);
-        shape = generator.path(
-          `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${
-            h - r
-          } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${
-            h - r
-          } L 0 ${r} Q 0 0, ${r} 0`,
-          generateRoughOptions(
-            modifyIframeLikeForRoughOptions(
-              element,
-              isExporting,
-              embedsValidationStatus,
-            ),
-            true,
-            isDarkMode,
+        shapes.push(
+          generator.path(
+            getRoundedRectPath(0, 0, w, h, r),
+            generateRoughOptions(roughElement, true, isDarkMode),
           ),
         );
       } else {
-        shape = generator.rectangle(
-          0,
-          0,
-          element.width,
-          element.height,
-          generateRoughOptions(
-            modifyIframeLikeForRoughOptions(
-              element,
-              isExporting,
-              embedsValidationStatus,
-            ),
-            false,
-            isDarkMode,
+        shapes.push(
+          generator.rectangle(
+            0,
+            0,
+            element.width,
+            element.height,
+            generateRoughOptions(roughElement, false, isDarkMode),
           ),
         );
       }
-      return shape;
+
+      if (element.strokeStyle === "double") {
+        const inset = getBoundedDoubleStrokeInset(element);
+        const innerWidth = element.width - inset * 2;
+        const innerHeight = element.height - inset * 2;
+
+        if (innerWidth > 0 && innerHeight > 0) {
+          if (element.roundness) {
+            shapes.push(
+              generator.path(
+                getRoundedRectPath(
+                  inset,
+                  inset,
+                  innerWidth,
+                  innerHeight,
+                  getCornerRadius(Math.min(innerWidth, innerHeight), element),
+                ),
+                getDoubleStrokeOptions(roughElement, true, isDarkMode),
+              ),
+            );
+          } else {
+            shapes.push(
+              generator.rectangle(
+                inset,
+                inset,
+                innerWidth,
+                innerHeight,
+                getDoubleStrokeOptions(roughElement, false, isDarkMode),
+              ),
+            );
+          }
+        }
+      }
+
+      return shapes;
     }
     case "diamond": {
-      let shape: ElementShapes[typeof element.type];
+      const shapes: ElementShapes[typeof element.type] = [];
 
       const [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] =
         getDiamondPoints(element);
@@ -826,49 +962,129 @@ const _generateElementShape = (
           element,
         );
 
-        shape = generator.path(
-          `M ${topX + verticalRadius} ${topY + horizontalRadius} L ${
-            rightX - verticalRadius
-          } ${rightY - horizontalRadius}
-            C ${rightX} ${rightY}, ${rightX} ${rightY}, ${
-            rightX - verticalRadius
-          } ${rightY + horizontalRadius}
-            L ${bottomX + verticalRadius} ${bottomY - horizontalRadius}
-            C ${bottomX} ${bottomY}, ${bottomX} ${bottomY}, ${
-            bottomX - verticalRadius
-          } ${bottomY - horizontalRadius}
-            L ${leftX + verticalRadius} ${leftY + horizontalRadius}
-            C ${leftX} ${leftY}, ${leftX} ${leftY}, ${leftX + verticalRadius} ${
-            leftY - horizontalRadius
-          }
-            L ${topX - verticalRadius} ${topY + horizontalRadius}
-            C ${topX} ${topY}, ${topX} ${topY}, ${topX + verticalRadius} ${
-            topY + horizontalRadius
-          }`,
-          generateRoughOptions(element, true, isDarkMode),
+        shapes.push(
+          generator.path(
+            getRoundedDiamondPath(
+              topX,
+              topY,
+              rightX,
+              rightY,
+              bottomX,
+              bottomY,
+              leftX,
+              leftY,
+              verticalRadius,
+              horizontalRadius,
+            ),
+            generateRoughOptions(element, true, isDarkMode),
+          ),
         );
       } else {
-        shape = generator.polygon(
-          [
-            [topX, topY],
-            [rightX, rightY],
-            [bottomX, bottomY],
-            [leftX, leftY],
-          ],
-          generateRoughOptions(element, false, isDarkMode),
+        shapes.push(
+          generator.polygon(
+            [
+              [topX, topY],
+              [rightX, rightY],
+              [bottomX, bottomY],
+              [leftX, leftY],
+            ],
+            generateRoughOptions(element, false, isDarkMode),
+          ),
         );
       }
-      return shape;
+
+      if (element.strokeStyle === "double") {
+        const inset = getBoundedDoubleStrokeInset(element);
+        const innerWidth = element.width - inset * 2;
+        const innerHeight = element.height - inset * 2;
+
+        if (innerWidth > 0 && innerHeight > 0) {
+          const [
+            innerTopX,
+            innerTopY,
+            innerRightX,
+            innerRightY,
+            innerBottomX,
+            innerBottomY,
+            innerLeftX,
+            innerLeftY,
+          ] = getDiamondPointsFromBounds(element.width, element.height, inset);
+
+          if (element.roundness) {
+            const verticalRadius = getCornerRadius(
+              Math.abs(innerTopX - innerLeftX),
+              element,
+            );
+            const horizontalRadius = getCornerRadius(
+              Math.abs(innerRightY - innerTopY),
+              element,
+            );
+
+            shapes.push(
+              generator.path(
+                getRoundedDiamondPath(
+                  innerTopX,
+                  innerTopY,
+                  innerRightX,
+                  innerRightY,
+                  innerBottomX,
+                  innerBottomY,
+                  innerLeftX,
+                  innerLeftY,
+                  verticalRadius,
+                  horizontalRadius,
+                ),
+                getDoubleStrokeOptions(element, true, isDarkMode),
+              ),
+            );
+          } else {
+            shapes.push(
+              generator.polygon(
+                [
+                  [innerTopX, innerTopY],
+                  [innerRightX, innerRightY],
+                  [innerBottomX, innerBottomY],
+                  [innerLeftX, innerLeftY],
+                ],
+                getDoubleStrokeOptions(element, false, isDarkMode),
+              ),
+            );
+          }
+        }
+      }
+
+      return shapes;
     }
     case "ellipse": {
-      const shape: ElementShapes[typeof element.type] = generator.ellipse(
-        element.width / 2,
-        element.height / 2,
-        element.width,
-        element.height,
-        generateRoughOptions(element, false, isDarkMode),
-      );
-      return shape;
+      const shapes: ElementShapes[typeof element.type] = [
+        generator.ellipse(
+          element.width / 2,
+          element.height / 2,
+          element.width,
+          element.height,
+          generateRoughOptions(element, false, isDarkMode),
+        ),
+      ];
+
+      if (element.strokeStyle === "double") {
+        const inset = getBoundedDoubleStrokeInset(element);
+        const innerWidth = element.width - inset * 2;
+        const innerHeight = element.height - inset * 2;
+
+        if (innerWidth > 0 && innerHeight > 0) {
+          shapes.push(
+            generator.ellipse(
+              element.width / 2,
+              element.height / 2,
+              innerWidth,
+              innerHeight,
+              getDoubleStrokeOptions(element, false, isDarkMode),
+            ),
+          );
+        }
+      }
+
+      return shapes;
     }
     case "line":
     case "arrow": {
@@ -881,7 +1097,91 @@ const _generateElementShape = (
         ? element.points
         : [pointFrom<LocalPoint>(0, 0)];
 
-      if (isElbowArrow(element)) {
+      const generateLinearStrokeShapes = (
+        nextPoints: RoughPoint[],
+        nextOptions: Options,
+      ): Drawable[] => {
+        if (isElbowArrow(element)) {
+          // NOTE (mtolmacs): Temporary fix for extremely big arrow shapes
+          if (
+            !nextPoints.every(
+              (point) => Math.abs(point[0]) <= 1e6 && Math.abs(point[1]) <= 1e6,
+            )
+          ) {
+            console.error(
+              `Elbow arrow with extreme point positions detected. Arrow not rendered.`,
+              element.id,
+              JSON.stringify(points),
+            );
+            return [];
+          }
+
+          return [
+            generator.path(
+              generateElbowArrowShape(nextPoints as readonly LocalPoint[], 16),
+              {
+                ...nextOptions,
+                preserveVertices: true,
+              },
+            ),
+          ];
+        }
+
+        if (!element.roundness) {
+          // curve is always the first element
+          // this simplifies finding the curve for an element
+          if (nextOptions.fill) {
+            return [
+              generator.polygon(
+                nextPoints as unknown as RoughPoint[],
+                nextOptions,
+              ),
+            ];
+          }
+
+          return [
+            generator.linearPath(
+              nextPoints as unknown as RoughPoint[],
+              nextOptions,
+            ),
+          ];
+        }
+
+        return [
+          generator.curve(nextPoints as unknown as RoughPoint[], nextOptions),
+        ];
+      };
+
+      let strokeShapes: Drawable[] = [];
+
+      if (element.strokeStyle === "double") {
+        const strokeOptions = getStrokeOnlyOptions(options);
+        const offset = getDoubleStrokeOffset(element.strokeWidth) / 2;
+
+        if (options.fill) {
+          shape = generateLinearStrokeShapes(
+            points as unknown as RoughPoint[],
+            {
+              ...options,
+              stroke: "none",
+            },
+          );
+        } else {
+          shape = [];
+        }
+
+        strokeShapes = [
+          ...generateLinearStrokeShapes(getOffsetPoints(points, -offset), {
+            ...strokeOptions,
+            seed: element.seed,
+          }),
+          ...generateLinearStrokeShapes(getOffsetPoints(points, offset), {
+            ...strokeOptions,
+            seed: element.seed + 1,
+          }),
+        ];
+        shape.push(...strokeShapes);
+      } else if (isElbowArrow(element)) {
         // NOTE (mtolmacs): Temporary fix for extremely big arrow shapes
         if (
           !points.every(
@@ -895,45 +1195,43 @@ const _generateElementShape = (
           );
           shape = [];
         } else {
-          shape = [
-            generator.path(
-              generateElbowArrowShape(points, 16),
-              generateRoughOptions(element, true, isDarkMode),
-            ),
-          ];
+          shape = generateLinearStrokeShapes(
+            points as unknown as RoughPoint[],
+            generateRoughOptions(element, true, isDarkMode),
+          );
         }
       } else if (!element.roundness) {
-        // curve is always the first element
-        // this simplifies finding the curve for an element
-        if (options.fill) {
-          shape = [
-            generator.polygon(points as unknown as RoughPoint[], options),
-          ];
-        } else {
-          shape = [
-            generator.linearPath(points as unknown as RoughPoint[], options),
-          ];
-        }
+        shape = generateLinearStrokeShapes(
+          points as unknown as RoughPoint[],
+          options,
+        );
       } else {
-        shape = [generator.curve(points as unknown as RoughPoint[], options)];
+        shape = generateLinearStrokeShapes(
+          points as unknown as RoughPoint[],
+          options,
+        );
       }
 
       // add lines only in arrow
       if (element.type === "arrow") {
         const { startArrowhead = null, endArrowhead = "arrow" } = element;
+        const arrowheadBaseShapes =
+          element.strokeStyle === "double" ? strokeShapes : shape;
 
         if (startArrowhead !== null) {
-          const shapes = getArrowheadShapes(
-            element,
-            shape,
-            "start",
-            startArrowhead,
-            generator,
-            options,
-            canvasBackgroundColor,
-            isDarkMode,
-          );
-          shape.push(...shapes);
+          arrowheadBaseShapes.forEach((arrowheadBaseShape) => {
+            const shapes = getArrowheadShapes(
+              element,
+              [arrowheadBaseShape],
+              "start",
+              startArrowhead,
+              generator,
+              options,
+              canvasBackgroundColor,
+              isDarkMode,
+            );
+            shape.push(...shapes);
+          });
         }
 
         if (endArrowhead !== null) {
@@ -941,17 +1239,19 @@ const _generateElementShape = (
             // Hey, we have an old arrow here!
           }
 
-          const shapes = getArrowheadShapes(
-            element,
-            shape,
-            "end",
-            endArrowhead,
-            generator,
-            options,
-            canvasBackgroundColor,
-            isDarkMode,
-          );
-          shape.push(...shapes);
+          arrowheadBaseShapes.forEach((arrowheadBaseShape) => {
+            const shapes = getArrowheadShapes(
+              element,
+              [arrowheadBaseShape],
+              "end",
+              endArrowhead,
+              generator,
+              options,
+              canvasBackgroundColor,
+              isDarkMode,
+            );
+            shape.push(...shapes);
+          });
         }
       }
       return shape;
