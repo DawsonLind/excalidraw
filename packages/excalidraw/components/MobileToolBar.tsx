@@ -27,6 +27,7 @@ import {
   EllipseIcon,
   LineIcon,
   TextIcon,
+  StickyNoteIcon,
   ImageIcon,
   frameToolIcon,
   EmbedIcon,
@@ -157,6 +158,7 @@ export const MobileToolBar = ({
 
   const extraTools = [
     "text",
+    "stickynote",
     "frame",
     "embeddable",
     "laser",
@@ -177,6 +179,8 @@ export const MobileToolBar = ({
   const extraIcon = extraToolSelected
     ? activeTool.type === "text"
       ? TextIcon
+      : activeTool.type === "stickynote"
+      ? StickyNoteIcon
       : activeTool.type === "image"
       ? ImageIcon
       : activeTool.type === "frame"
@@ -427,6 +431,15 @@ export const MobileToolBar = ({
               {t("toolBar.image")}
             </DropdownMenu.Item>
           )}
+          <DropdownMenu.Item
+            onSelect={() => app.setActiveTool({ type: "stickynote" })}
+            icon={StickyNoteIcon}
+            shortcut={KEYS.N.toLocaleUpperCase()}
+            data-testid="toolbar-stickynote"
+            selected={activeTool.type === "stickynote"}
+          >
+            {t("toolBar.stickynote")}
+          </DropdownMenu.Item>
           {!showFrameToolOutside && (
             <DropdownMenu.Item
               onSelect={() => app.setActiveTool({ type: "frame" })}

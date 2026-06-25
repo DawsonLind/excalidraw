@@ -120,6 +120,7 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
     },
     tools: {
       image: props.UIOptions?.tools?.image ?? true,
+      stickynote: props.UIOptions?.tools?.stickynote ?? true,
     },
   };
 

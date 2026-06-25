@@ -4,7 +4,10 @@ import type {
 } from "@excalidraw/element/types";
 import type { AppProps, AppState } from "@excalidraw/excalidraw/types";
 
-import { COLOR_PALETTE } from "./colors";
+import {
+  COLOR_PALETTE,
+  DEFAULT_ELEMENT_BACKGROUND_COLOR_INDEX,
+} from "./colors";
 
 export const supportsResizeObserver =
   typeof window !== "undefined" && "ResizeObserver" in window;
@@ -466,6 +469,22 @@ export const DEFAULT_ELEMENT_PROPS: {
   locked: false,
 };
 
+export const STICKY_NOTE_DEFAULTS = {
+  width: 200,
+  height: 200,
+  strokeColor: COLOR_PALETTE.yellow[4] as ExcalidrawElement["strokeColor"],
+  backgroundColor: COLOR_PALETTE.yellow[
+    DEFAULT_ELEMENT_BACKGROUND_COLOR_INDEX
+  ] as ExcalidrawElement["backgroundColor"],
+  fillStyle: "solid" as ExcalidrawElement["fillStyle"],
+  strokeWidth: STROKE_WIDTH[DEFAULT_ELEMENT_STROKE_WIDTH_KEY],
+  strokeStyle: "solid" as ExcalidrawElement["strokeStyle"],
+  roughness: ROUGHNESS.artist,
+  roundness: {
+    type: ROUNDNESS.ADAPTIVE_RADIUS,
+  } as ExcalidrawElement["roundness"],
+} as const;
+
 export const LIBRARY_SIDEBAR_TAB = "library";
 export const CANVAS_SEARCH_TAB = "search";
 
@@ -491,6 +510,7 @@ export const TOOL_TYPE = {
   line: "line",
   freedraw: "freedraw",
   text: "text",
+  stickynote: "stickynote",
   image: "image",
   eraser: "eraser",
   hand: "hand",
