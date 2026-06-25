@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Vienlaidu",
     "strokeStyle_dashed": "Raustīta līnija",
     "strokeStyle_dotted": "Punktota līnija",
+    "strokeStyle_double": "Double",
     "sloppiness": "Precizitāte",
     "opacity": "Necaurspīdīgums",
     "textAlign": "Teksta līdzināšana",

@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Solid",
     "strokeStyle_dashed": "Streckad",
     "strokeStyle_dotted": "Punktad",
+    "strokeStyle_double": "Double",
     "sloppiness": "Slarvighet",
     "opacity": "Genomskinlighet",
     "textAlign": "Textjustering",

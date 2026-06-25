@@ -63,6 +63,23 @@ const roughSVGDrawWithPrecision = (
   return rsvg.draw(pshape);
 };
 
+const roughSVGDrawShapeWithPrecision = (
+  rsvg: RoughSVG,
+  shape: Drawable | Drawable[],
+  precision?: number,
+) => {
+  if (!Array.isArray(shape)) {
+    return roughSVGDrawWithPrecision(rsvg, shape, precision);
+  }
+
+  const nodes = shape.map((drawable) =>
+    roughSVGDrawWithPrecision(rsvg, drawable, precision),
+  );
+  const group = nodes[0].ownerDocument.createElementNS(SVG_NS, "g");
+  nodes.forEach((node) => group.appendChild(node));
+  return group;
+};
+
 const maybeWrapNodesInFrameClipPath = (
   element: NonDeletedExcalidrawElement,
   root: SVGElement,
@@ -149,7 +166,7 @@ const renderElementToSvg = (
     case "diamond":
     case "ellipse": {
       const shape = ShapeCache.generateElementShape(element, renderConfig);
-      const node = roughSVGDrawWithPrecision(
+      const node = roughSVGDrawShapeWithPrecision(
         rsvg,
         shape,
         MAX_DECIMALS_FOR_SVG_EXPORT,
@@ -181,7 +198,7 @@ const renderElementToSvg = (
     case "embeddable": {
       // render placeholder rectangle
       const shape = ShapeCache.generateElementShape(element, renderConfig);
-      const node = roughSVGDrawWithPrecision(
+      const node = roughSVGDrawShapeWithPrecision(
         rsvg,
         shape,
         MAX_DECIMALS_FOR_SVG_EXPORT,
@@ -214,7 +231,7 @@ const renderElementToSvg = (
       );
 
       // render embeddable element + iframe
-      const embeddableNode = roughSVGDrawWithPrecision(
+      const embeddableNode = roughSVGDrawShapeWithPrecision(
         rsvg,
         shape,
         MAX_DECIMALS_FOR_SVG_EXPORT,

@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Kitöltött",
     "strokeStyle_dashed": "Szaggatott",
     "strokeStyle_dotted": "Pontozott",
+    "strokeStyle_double": "Double",
     "sloppiness": "Stílus",
     "opacity": "Áttetszőség",
     "textAlign": "Szöveg igazítása",

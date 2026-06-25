@@ -292,6 +292,385 @@ const modifyIframeLikeForRoughOptions = (
   return element;
 };
 
+const getDoubleStrokeInset = (element: ExcalidrawElement) =>
+  Math.max(4, element.strokeWidth * 3);
+
+const getDoubleStrokeLinearOffset = (element: ExcalidrawLinearElement) =>
+  Math.max(2.5, element.strokeWidth * 1.75);
+
+const getClampedDoubleStrokeInset = (element: ExcalidrawElement) =>
+  Math.min(
+    getDoubleStrokeInset(element),
+    Math.max(
+      0,
+      Math.min(Math.abs(element.width), Math.abs(element.height)) / 2,
+    ),
+  );
+
+const getFillOnlyOptions = (options: Options): Options => ({
+  ...options,
+  stroke: "none",
+});
+
+const getStrokeOnlyOptions = (
+  options: Options,
+  seedOffset = 0,
+): Options => {
+  const strokeOnlyOptions: Options = {
+    ...options,
+    seed: options.seed !== undefined ? options.seed + seedOffset : undefined,
+  };
+  delete strokeOnlyOptions.fill;
+  delete strokeOnlyOptions.fillStyle;
+  return strokeOnlyOptions;
+};
+
+const getRoundedRectanglePath = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) =>
+  `M ${x + radius} ${y} L ${x + width - radius} ${y} Q ${x + width} ${y}, ${
+    x + width
+  } ${y + radius} L ${x + width} ${y + height - radius} Q ${x + width} ${
+    y + height
+  }, ${x + width - radius} ${y + height} L ${x + radius} ${
+    y + height
+  } Q ${x} ${y + height}, ${x} ${y + height - radius} L ${x} ${
+    y + radius
+  } Q ${x} ${y}, ${x + radius} ${y}`;
+
+const generateRectanguloidShape = (
+  element: Extract<
+    NonDeletedExcalidrawElement,
+    { type: "rectangle" | "iframe" | "embeddable" }
+  >,
+  generator: RoughGenerator,
+  options: Options,
+  inset = 0,
+) => {
+  const width = Math.max(0, element.width - inset * 2);
+  const height = Math.max(0, element.height - inset * 2);
+
+  if (element.roundness) {
+    const radius = Math.max(
+      0,
+      Math.min(
+        getCornerRadius(Math.min(element.width, element.height), element) -
+          inset,
+        Math.min(width, height) / 2,
+      ),
+    );
+    return generator.path(
+      getRoundedRectanglePath(inset, inset, width, height, radius),
+      options,
+    );
+  }
+
+  return generator.rectangle(inset, inset, width, height, options);
+};
+
+const generateDoubleStrokeRectanguloidShapes = (
+  element: Extract<
+    NonDeletedExcalidrawElement,
+    { type: "rectangle" | "iframe" | "embeddable" }
+  >,
+  generator: RoughGenerator,
+  isDarkMode: boolean,
+) => {
+  const options = generateRoughOptions(element, !!element.roundness, isDarkMode);
+  const shapes: Drawable[] = [];
+
+  if (options.fill) {
+    shapes.push(
+      generateRectanguloidShape(
+        element,
+        generator,
+        getFillOnlyOptions(options),
+      ),
+    );
+  }
+
+  shapes.push(
+    generateRectanguloidShape(
+      element,
+      generator,
+      getStrokeOnlyOptions(options),
+    ),
+  );
+
+  const inset = getClampedDoubleStrokeInset(element);
+  if (inset > 0) {
+    shapes.push(
+      generateRectanguloidShape(
+        element,
+        generator,
+        getStrokeOnlyOptions(options, 1),
+        inset,
+      ),
+    );
+  }
+
+  return shapes;
+};
+
+const getInsetDiamondPoints = (
+  element: ExcalidrawElement,
+  inset: number,
+): [number, number, number, number, number, number, number, number] => {
+  const points = getDiamondPoints(element);
+  const centerX = element.width / 2;
+  const centerY = element.height / 2;
+  const scaleX =
+    element.width === 0
+      ? 1
+      : Math.max(0, element.width - inset * 2) / element.width;
+  const scaleY =
+    element.height === 0
+      ? 1
+      : Math.max(0, element.height - inset * 2) / element.height;
+
+  return points.map((point, index) =>
+    index % 2 === 0
+      ? centerX + (point - centerX) * scaleX
+      : centerY + (point - centerY) * scaleY,
+  ) as [number, number, number, number, number, number, number, number];
+};
+
+const getRoundedDiamondPath = (
+  element: Extract<NonDeletedExcalidrawElement, { type: "diamond" }>,
+  inset = 0,
+) => {
+  const [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] =
+    getInsetDiamondPoints(element, inset);
+  const verticalRadius = Math.min(
+    element.roundness ? getCornerRadius(Math.abs(topX - leftX), element) : 0,
+    Math.abs(topX - leftX),
+  );
+  const horizontalRadius = Math.min(
+    element.roundness ? getCornerRadius(Math.abs(rightY - topY), element) : 0,
+    Math.abs(rightY - topY),
+  );
+
+  return `M ${topX + verticalRadius} ${topY + horizontalRadius} L ${
+    rightX - verticalRadius
+  } ${rightY - horizontalRadius}
+    C ${rightX} ${rightY}, ${rightX} ${rightY}, ${
+    rightX - verticalRadius
+  } ${rightY + horizontalRadius}
+    L ${bottomX + verticalRadius} ${bottomY - horizontalRadius}
+    C ${bottomX} ${bottomY}, ${bottomX} ${bottomY}, ${
+    bottomX - verticalRadius
+  } ${bottomY - horizontalRadius}
+    L ${leftX + verticalRadius} ${leftY + horizontalRadius}
+    C ${leftX} ${leftY}, ${leftX} ${leftY}, ${leftX + verticalRadius} ${
+    leftY - horizontalRadius
+  }
+    L ${topX - verticalRadius} ${topY + horizontalRadius}
+    C ${topX} ${topY}, ${topX} ${topY}, ${topX + verticalRadius} ${
+    topY + horizontalRadius
+  }`;
+};
+
+const generateDiamondShape = (
+  element: Extract<NonDeletedExcalidrawElement, { type: "diamond" }>,
+  generator: RoughGenerator,
+  options: Options,
+  inset = 0,
+) => {
+  const [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] =
+    getInsetDiamondPoints(element, inset);
+
+  if (element.roundness) {
+    return generator.path(getRoundedDiamondPath(element, inset), options);
+  }
+
+  return generator.polygon(
+    [
+      [topX, topY],
+      [rightX, rightY],
+      [bottomX, bottomY],
+      [leftX, leftY],
+    ],
+    options,
+  );
+};
+
+const generateDoubleStrokeDiamondShapes = (
+  element: Extract<NonDeletedExcalidrawElement, { type: "diamond" }>,
+  generator: RoughGenerator,
+  isDarkMode: boolean,
+) => {
+  const options = generateRoughOptions(element, !!element.roundness, isDarkMode);
+  const shapes: Drawable[] = [];
+
+  if (options.fill) {
+    shapes.push(
+      generateDiamondShape(element, generator, getFillOnlyOptions(options)),
+    );
+  }
+
+  shapes.push(
+    generateDiamondShape(element, generator, getStrokeOnlyOptions(options)),
+  );
+
+  const inset = getClampedDoubleStrokeInset(element);
+  if (inset > 0) {
+    shapes.push(
+      generateDiamondShape(
+        element,
+        generator,
+        getStrokeOnlyOptions(options, 1),
+        inset,
+      ),
+    );
+  }
+
+  return shapes;
+};
+
+const generateEllipseShape = (
+  element: Extract<NonDeletedExcalidrawElement, { type: "ellipse" }>,
+  generator: RoughGenerator,
+  options: Options,
+  inset = 0,
+) =>
+  generator.ellipse(
+    element.width / 2,
+    element.height / 2,
+    Math.max(0, element.width - inset * 2),
+    Math.max(0, element.height - inset * 2),
+    options,
+  );
+
+const generateDoubleStrokeEllipseShapes = (
+  element: Extract<NonDeletedExcalidrawElement, { type: "ellipse" }>,
+  generator: RoughGenerator,
+  isDarkMode: boolean,
+) => {
+  const options = generateRoughOptions(element, false, isDarkMode);
+  const shapes: Drawable[] = [];
+
+  if (options.fill) {
+    shapes.push(
+      generateEllipseShape(element, generator, getFillOnlyOptions(options)),
+    );
+  }
+
+  shapes.push(
+    generateEllipseShape(element, generator, getStrokeOnlyOptions(options)),
+  );
+
+  const inset = getClampedDoubleStrokeInset(element);
+  if (inset > 0) {
+    shapes.push(
+      generateEllipseShape(
+        element,
+        generator,
+        getStrokeOnlyOptions(options, 1),
+        inset,
+      ),
+    );
+  }
+
+  return shapes;
+};
+
+const getOffsetLinearPoints = (
+  points: readonly LocalPoint[],
+  offset: number,
+): LocalPoint[] =>
+  points.map((point, index) => {
+    const prevPoint = points[Math.max(0, index - 1)];
+    const nextPoint = points[Math.min(points.length - 1, index + 1)];
+    const dx = nextPoint[0] - prevPoint[0];
+    const dy = nextPoint[1] - prevPoint[1];
+    const length = Math.hypot(dx, dy);
+
+    if (length === 0) {
+      return pointFrom<LocalPoint>(point[0], point[1] + offset);
+    }
+
+    return pointFrom<LocalPoint>(
+      point[0] + (-dy / length) * offset,
+      point[1] + (dx / length) * offset,
+    );
+  });
+
+const generateLinearShape = (
+  element: ExcalidrawLinearElement,
+  generator: RoughGenerator,
+  points: readonly LocalPoint[],
+  options: Options,
+) => {
+  if (isElbowArrow(element)) {
+    if (
+      !points.every(
+        (point) => Math.abs(point[0]) <= 1e6 && Math.abs(point[1]) <= 1e6,
+      )
+    ) {
+      console.error(
+        `Elbow arrow with extreme point positions detected. Arrow not rendered.`,
+        element.id,
+        JSON.stringify(points),
+      );
+      return null;
+    }
+
+    return generator.path(generateElbowArrowShape(points, 16), options);
+  }
+
+  if (!element.roundness) {
+    if (options.fill) {
+      return generator.polygon(points as unknown as RoughPoint[], options);
+    }
+    return generator.linearPath(points as unknown as RoughPoint[], options);
+  }
+
+  return generator.curve(points as unknown as RoughPoint[], options);
+};
+
+const generateDoubleStrokeLinearShapes = (
+  element: ExcalidrawLinearElement,
+  generator: RoughGenerator,
+  isDarkMode: boolean,
+) => {
+  const options = generateRoughOptions(element, false, isDarkMode);
+  const points = element.points.length
+    ? element.points
+    : [pointFrom<LocalPoint>(0, 0)];
+  const centerShape = generateLinearShape(
+    element,
+    generator,
+    points,
+    getFillOnlyOptions(options),
+  );
+
+  if (!centerShape) {
+    return [];
+  }
+
+  const offset = getDoubleStrokeLinearOffset(element);
+  const positiveOffsetShape = generateLinearShape(
+    element,
+    generator,
+    getOffsetLinearPoints(points, offset),
+    getStrokeOnlyOptions(options),
+  );
+  const negativeOffsetShape = generateLinearShape(
+    element,
+    generator,
+    getOffsetLinearPoints(points, -offset),
+    getStrokeOnlyOptions(options, 1),
+  );
+
+  return [centerShape, positiveOffsetShape, negativeOffsetShape].filter(
+    (shape): shape is Drawable => !!shape,
+  );
+};
+
 const generateArrowheadCardinalityOne = (
   generator: RoughGenerator,
   arrowheadPoints: number[] | null,
@@ -773,48 +1152,45 @@ const _generateElementShape = (
       let shape: ElementShapes[typeof element.type];
       // this is for rendering the stroke/bg of the embeddable, especially
       // when the src url is not set
+      const roughElement = modifyIframeLikeForRoughOptions(
+        element,
+        isExporting,
+        embedsValidationStatus,
+      );
 
-      if (element.roundness) {
-        const w = element.width;
-        const h = element.height;
-        const r = getCornerRadius(Math.min(w, h), element);
+      if (roughElement.strokeStyle === "double") {
+        return generateDoubleStrokeRectanguloidShapes(
+          roughElement,
+          generator,
+          isDarkMode,
+        );
+      }
+
+      if (roughElement.roundness) {
+        const w = roughElement.width;
+        const h = roughElement.height;
+        const r = getCornerRadius(Math.min(w, h), roughElement);
         shape = generator.path(
-          `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${
-            h - r
-          } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${
-            h - r
-          } L 0 ${r} Q 0 0, ${r} 0`,
-          generateRoughOptions(
-            modifyIframeLikeForRoughOptions(
-              element,
-              isExporting,
-              embedsValidationStatus,
-            ),
-            true,
-            isDarkMode,
-          ),
+          getRoundedRectanglePath(0, 0, w, h, r),
+          generateRoughOptions(roughElement, true, isDarkMode),
         );
       } else {
         shape = generator.rectangle(
           0,
           0,
-          element.width,
-          element.height,
-          generateRoughOptions(
-            modifyIframeLikeForRoughOptions(
-              element,
-              isExporting,
-              embedsValidationStatus,
-            ),
-            false,
-            isDarkMode,
-          ),
+          roughElement.width,
+          roughElement.height,
+          generateRoughOptions(roughElement, false, isDarkMode),
         );
       }
       return shape;
     }
     case "diamond": {
       let shape: ElementShapes[typeof element.type];
+
+      if (element.strokeStyle === "double") {
+        return generateDoubleStrokeDiamondShapes(element, generator, isDarkMode);
+      }
 
       const [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] =
         getDiamondPoints(element);
@@ -861,6 +1237,10 @@ const _generateElementShape = (
       return shape;
     }
     case "ellipse": {
+      if (element.strokeStyle === "double") {
+        return generateDoubleStrokeEllipseShapes(element, generator, isDarkMode);
+      }
+
       const shape: ElementShapes[typeof element.type] = generator.ellipse(
         element.width / 2,
         element.height / 2,
@@ -881,7 +1261,9 @@ const _generateElementShape = (
         ? element.points
         : [pointFrom<LocalPoint>(0, 0)];
 
-      if (isElbowArrow(element)) {
+      if (element.strokeStyle === "double") {
+        shape = generateDoubleStrokeLinearShapes(element, generator, isDarkMode);
+      } else if (isElbowArrow(element)) {
         // NOTE (mtolmacs): Temporary fix for extremely big arrow shapes
         if (
           !points.every(

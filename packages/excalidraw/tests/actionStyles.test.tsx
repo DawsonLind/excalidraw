@@ -48,7 +48,7 @@ describe("actionStyles", () => {
     // Stroke width
     fireEvent.click(screen.getByTitle("Bold"));
     // Stroke style
-    fireEvent.click(screen.getByTitle("Dotted"));
+    fireEvent.click(screen.getByTitle("Double"));
     // Roughness
     fireEvent.click(screen.getByTitle("Cartoonist"));
     // Opacity
@@ -79,7 +79,7 @@ describe("actionStyles", () => {
     expect(firstRect.backgroundColor).toBe("#a5d8ff");
     expect(firstRect.fillStyle).toBe("cross-hatch");
     expect(firstRect.strokeWidth).toBe(STROKE_WIDTH.bold);
-    expect(firstRect.strokeStyle).toBe("dotted");
+    expect(firstRect.strokeStyle).toBe("double");
     expect(firstRect.roughness).toBe(2); // Cartoonist: 2
     expect(firstRect.opacity).toBe(60);
   });

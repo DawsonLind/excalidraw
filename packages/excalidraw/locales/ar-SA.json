@@ -30,6 +30,7 @@
     "strokeStyle_solid": "متصل",
     "strokeStyle_dashed": "متقطع",
     "strokeStyle_dotted": "منقط",
+    "strokeStyle_double": "Double",
     "sloppiness": "الإمالة",
     "opacity": "الشفافية",
     "textAlign": "محاذاة النص",

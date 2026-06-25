@@ -81,6 +81,7 @@ import type {
 } from "./types";
 
 import type { RoughCanvas } from "roughjs/bin/canvas";
+import type { Drawable } from "roughjs/bin/core";
 
 const isPendingImageElement = (
   element: ExcalidrawElement,
@@ -384,6 +385,14 @@ const drawImagePlaceholder = (
   );
 };
 
+const drawRoughShape = (rc: RoughCanvas, shape: Drawable | Drawable[]) => {
+  if (Array.isArray(shape)) {
+    shape.forEach((subShape) => rc.draw(subShape));
+  } else {
+    rc.draw(shape);
+  }
+};
+
 const drawElementOnCanvas = (
   element: NonDeletedExcalidrawElement,
   rc: RoughCanvas,
@@ -399,7 +408,10 @@ const drawElementOnCanvas = (
       context.lineJoin = "round";
       context.lineCap = "round";
 
-      rc.draw(ShapeCache.generateElementShape(element, renderConfig));
+      drawRoughShape(
+        rc,
+        ShapeCache.generateElementShape(element, renderConfig),
+      );
       break;
     }
     case "arrow":

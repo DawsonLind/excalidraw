@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Yhtenäinen",
     "strokeStyle_dashed": "Katkoviiva",
     "strokeStyle_dotted": "Pisteviiva",
+    "strokeStyle_double": "Double",
     "sloppiness": "Viivan tarkkuus",
     "opacity": "Peittävyys",
     "textAlign": "Tekstin tasaus",

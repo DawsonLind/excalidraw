@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Суцільний",
     "strokeStyle_dashed": "Пунктир",
     "strokeStyle_dotted": "Крапки",
+    "strokeStyle_double": "Double",
     "sloppiness": "Охайність",
     "opacity": "Прозорість",
     "textAlign": "Вирівнювання тексту",

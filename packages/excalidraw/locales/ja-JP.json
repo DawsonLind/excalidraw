@@ -30,6 +30,7 @@
     "strokeStyle_solid": "実線",
     "strokeStyle_dashed": "破線",
     "strokeStyle_dotted": "点線",
+    "strokeStyle_double": "Double",
     "sloppiness": "ばらつき加減",
     "opacity": "透明度",
     "textAlign": "文字の配置",

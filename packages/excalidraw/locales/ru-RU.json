@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Сплошная",
     "strokeStyle_dashed": "Пунктирная",
     "strokeStyle_dotted": "Точечная",
+    "strokeStyle_double": "Double",
     "sloppiness": "Стиль обводки",
     "opacity": "Непрозрачность",
     "textAlign": "Выравнивание текста",

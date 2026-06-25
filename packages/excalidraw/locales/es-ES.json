@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Sólido",
     "strokeStyle_dashed": "Discontinua",
     "strokeStyle_dotted": "Punteado",
+    "strokeStyle_double": "Double",
     "sloppiness": "Estilo de trazo",
     "opacity": "Opacidad",
     "textAlign": "Alineado de texto",

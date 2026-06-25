@@ -30,6 +30,7 @@
     "strokeStyle_solid": "Durchgezogen",
     "strokeStyle_dashed": "Gestrichelt",
     "strokeStyle_dotted": "Gepunktet",
+    "strokeStyle_double": "Double",
     "sloppiness": "Sauberkeit",
     "opacity": "Deckkraft",
     "textAlign": "Textausrichtung",

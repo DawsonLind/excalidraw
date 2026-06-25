@@ -30,6 +30,7 @@
     "strokeStyle_solid": "實線",
     "strokeStyle_dashed": "虛線",
     "strokeStyle_dotted": "點線",
+    "strokeStyle_double": "Double",
     "sloppiness": "線條風格",
     "opacity": "透明度",
     "textAlign": "文字對齊",
