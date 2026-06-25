@@ -58,6 +58,7 @@ import {
   getGlobalFixedPointForBindableElement,
   isFocusPointVisible,
 } from "@excalidraw/element";
+import { getHeartPath } from "@excalidraw/utils/shape";
 
 import type { EditorInterface } from "@excalidraw/common";
 
@@ -310,6 +311,9 @@ const renderBindingHighlightForBindableElement_simple = (
           : `rgba(106, 189, 252, 1)`;
 
       switch (suggestedBinding.element.type) {
+        case "heart":
+          context.stroke(new Path2D(getHeartPath(suggestedBinding.element)));
+          break;
         case "ellipse":
           context.beginPath();
           context.ellipse(
@@ -651,6 +655,16 @@ const renderBindingHighlightForBindableElement_complex = (
           : `rgba(106, 189, 252, ${opacity / 2})`;
 
       switch (element.type) {
+        case "heart":
+          context.stroke(
+            new Path2D(
+              getHeartPath({
+                width: element.width + offset * 2,
+                height: element.height + offset * 2,
+              }),
+            ),
+          );
+          break;
         case "ellipse":
           context.beginPath();
           context.ellipse(
