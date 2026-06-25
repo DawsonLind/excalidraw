@@ -53,6 +53,7 @@ import {
   ZOOM_STEP,
   POINTER_EVENTS,
   TOOL_TYPE,
+  STICKY_NOTE_DEFAULTS,
   supportsResizeObserver,
   DEFAULT_COLLISION_THRESHOLD,
   DEFAULT_TEXT_ALIGN,
@@ -274,6 +275,7 @@ import type {
   ExcalidrawGenericElement,
   ExcalidrawLinearElement,
   ExcalidrawTextElement,
+  ExcalidrawRectangleElement,
   NonDeleted,
   InitializedExcalidrawImageElement,
   ExcalidrawImageElement,
@@ -8062,6 +8064,8 @@ class App extends React.Component<AppProps, AppState> {
         pointerDownState,
         this.state.activeTool.type,
       );
+    } else if (this.state.activeTool.type === TOOL_TYPE.stickynote) {
+      this.createStickyNoteOnPointerDown(pointerDownState);
     } else if (this.state.activeTool.type === "laser") {
       this.laserTrails.startPath(
         pointerDownState.lastCoords.x,
@@ -9613,6 +9617,52 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({
       multiElement: null,
       newElement: frame,
+    });
+  };
+
+  private createStickyNoteOnPointerDown = (
+    pointerDownState: PointerDownState,
+  ): void => {
+    const [gridX, gridY] = getGridPoint(
+      pointerDownState.origin.x,
+      pointerDownState.origin.y,
+      this.lastPointerDownEvent?.[KEYS.CTRL_OR_CMD]
+        ? null
+        : this.getEffectiveGridSize(),
+    );
+
+    const topLayerFrame = this.getTopLayerFrameAtSceneCoords({
+      x: gridX,
+      y: gridY,
+    });
+
+    const stickyNote = newElement({
+      type: "rectangle",
+      x: gridX - STICKY_NOTE_DEFAULTS.width / 2,
+      y: gridY - STICKY_NOTE_DEFAULTS.height / 2,
+      width: STICKY_NOTE_DEFAULTS.width,
+      height: STICKY_NOTE_DEFAULTS.height,
+      strokeColor: STICKY_NOTE_DEFAULTS.strokeColor,
+      backgroundColor: STICKY_NOTE_DEFAULTS.backgroundColor,
+      fillStyle: STICKY_NOTE_DEFAULTS.fillStyle,
+      strokeWidth: STICKY_NOTE_DEFAULTS.strokeWidth,
+      strokeStyle: STICKY_NOTE_DEFAULTS.strokeStyle,
+      roughness: STICKY_NOTE_DEFAULTS.roughness,
+      opacity: this.state.currentItemOpacity,
+      roundness: STICKY_NOTE_DEFAULTS.roundness,
+      locked: false,
+      frameId: topLayerFrame ? topLayerFrame.id : null,
+    }) as NonDeleted<ExcalidrawRectangleElement>;
+
+    this.insertNewElement(stickyNote);
+    this.setState({
+      multiElement: null,
+      newElement: null,
+    });
+    this.startTextEditing({
+      sceneX: gridX,
+      sceneY: gridY,
+      container: stickyNote,
     });
   };
 
