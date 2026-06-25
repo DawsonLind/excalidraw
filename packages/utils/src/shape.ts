@@ -115,10 +115,7 @@ type RectangularElement =
 
 const HEART_SAMPLES_PER_CURVE = 12;
 
-const getHeartControlPoints = (
-  element: ExcalidrawHeartElement,
-  offset = 0,
-) => {
+const getHeartControlPoints = (element: ExcalidrawHeartElement, offset = 0) => {
   const x = element.x - offset;
   const y = element.y - offset;
   const width = element.width + offset * 2;

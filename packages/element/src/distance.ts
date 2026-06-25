@@ -127,7 +127,9 @@ const distanceToHeartElement = (
     lineSegment(point, points[(index + 1) % points.length]),
   );
 
-  return Math.min(...sides.map((side) => distanceToLineSegment(rotatedPoint, side)));
+  return Math.min(
+    ...sides.map((side) => distanceToLineSegment(rotatedPoint, side)),
+  );
 };
 
 /**
