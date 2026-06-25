@@ -8,6 +8,8 @@ import {
   getCurveShape,
   getEllipseShape,
   getFreedrawShape,
+  getHeartPath,
+  getHeartShape,
   getPolygonShape,
 } from "@excalidraw/utils/shape";
 
@@ -230,6 +232,7 @@ export const generateRoughOptions = (
     case "iframe":
     case "embeddable":
     case "diamond":
+    case "heart":
     case "ellipse": {
       options.fillStyle = element.fillStyle;
       options.fill = isTransparent(element.backgroundColor)
@@ -860,6 +863,13 @@ const _generateElementShape = (
       }
       return shape;
     }
+    case "heart": {
+      const shape: ElementShapes[typeof element.type] = generator.path(
+        getHeartPath(element),
+        generateRoughOptions(element, true, isDarkMode),
+      );
+      return shape;
+    }
     case "ellipse": {
       const shape: ElementShapes[typeof element.type] = generator.ellipse(
         element.width / 2,
@@ -1075,6 +1085,7 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
   switch (element.type) {
     case "rectangle":
     case "diamond":
+    case "heart":
     case "frame":
     case "magicframe":
     case "embeddable":
@@ -1082,7 +1093,9 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
     case "iframe":
     case "text":
     case "selection":
-      return getPolygonShape(element);
+      return element.type === "heart"
+        ? getHeartShape(element)
+        : getPolygonShape(element);
     case "arrow":
     case "line": {
       const roughShape = ShapeCache.generateElementShape(element, null)[0];
