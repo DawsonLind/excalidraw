@@ -1118,7 +1118,10 @@ const _generateElementShape = (
 
           return [
             generator.path(
-              generateElbowArrowShape(nextPoints as readonly LocalPoint[], 16),
+              generateElbowArrowShape(
+                nextPoints as unknown as readonly LocalPoint[],
+                16,
+              ),
               {
                 ...nextOptions,
                 preserveVertices: true,

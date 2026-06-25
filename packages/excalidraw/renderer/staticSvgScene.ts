@@ -189,27 +189,26 @@ const renderElementToSvg = (
       const group = svgRoot.ownerDocument.createElementNS(SVG_NS, "g");
       group.setAttribute("stroke-linecap", "round");
       const opacity = element.opacity / 100;
+      const shapes = ShapeCache.generateElementShape(element, renderConfig);
 
-      ShapeCache.generateElementShape(element, renderConfig).forEach(
-        (shape) => {
-          const node = roughSVGDrawWithPrecision(
-            rsvg,
-            shape,
-            MAX_DECIMALS_FOR_SVG_EXPORT,
-          );
-          if (opacity !== 1) {
-            node.setAttribute("stroke-opacity", `${opacity}`);
-            node.setAttribute("fill-opacity", `${opacity}`);
-          }
-          node.setAttribute(
-            "transform",
-            `translate(${offsetX || 0} ${
-              offsetY || 0
-            }) rotate(${degree} ${cx} ${cy})`,
-          );
-          group.appendChild(node);
-        },
-      );
+      shapes.forEach((shape) => {
+        const node = roughSVGDrawWithPrecision(
+          rsvg,
+          shape,
+          MAX_DECIMALS_FOR_SVG_EXPORT,
+        );
+        if (opacity !== 1) {
+          node.setAttribute("stroke-opacity", `${opacity}`);
+          node.setAttribute("fill-opacity", `${opacity}`);
+        }
+        node.setAttribute(
+          "transform",
+          `translate(${offsetX || 0} ${
+            offsetY || 0
+          }) rotate(${degree} ${cx} ${cy})`,
+        );
+        group.appendChild(node);
+      });
       addToRoot(group, element);
 
       const label: ExcalidrawElement =
@@ -228,7 +227,7 @@ const renderElementToSvg = (
       // render embeddable element + iframe
       const embeddableNode = roughSVGDrawWithPrecision(
         rsvg,
-        shape,
+        shapes[0],
         MAX_DECIMALS_FOR_SVG_EXPORT,
       );
       embeddableNode.setAttribute("stroke-linecap", "round");

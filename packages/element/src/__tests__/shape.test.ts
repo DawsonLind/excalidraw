@@ -1,3 +1,5 @@
+import { pointFrom, type LocalPoint } from "@excalidraw/math";
+
 import { convertToExcalidrawElements } from "../transform";
 import { ShapeCache } from "../shape";
 
@@ -22,6 +24,10 @@ describe("ShapeCache", () => {
       strokeStyle: "double",
     });
 
+    if (rectangle.type !== "rectangle") {
+      throw new Error("Expected a rectangle element");
+    }
+
     expect(ShapeCache.generateElementShape(rectangle, null)).toHaveLength(2);
   });
 
@@ -31,12 +37,13 @@ describe("ShapeCache", () => {
       id: "line",
       x: 0,
       y: 0,
-      points: [
-        [0, 0],
-        [100, 0],
-      ],
+      points: [pointFrom<LocalPoint>(0, 0), pointFrom<LocalPoint>(100, 0)],
       strokeStyle: "double",
     });
+
+    if (line.type !== "line") {
+      throw new Error("Expected a line element");
+    }
 
     expect(ShapeCache.generateElementShape(line, null)).toHaveLength(2);
   });
