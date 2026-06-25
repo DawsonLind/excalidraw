@@ -29,6 +29,7 @@ import type {
   ExcalidrawLineElement,
   ExcalidrawFlowchartNodeElement,
   ExcalidrawLinearElementSubType,
+  ExcalidrawRectanguloidElement,
 } from "./types";
 
 export const isInitializedImageElement = (
@@ -196,12 +197,11 @@ export const isBindableElement = (
 
 export const isRectanguloidElement = (
   element?: ExcalidrawElement | null,
-): element is ExcalidrawBindableElement => {
+): element is ExcalidrawRectanguloidElement => {
   return (
     element != null &&
     (element.type === "rectangle" ||
       element.type === "diamond" ||
-      element.type === "heart" ||
       element.type === "image" ||
       element.type === "iframe" ||
       element.type === "embeddable" ||
