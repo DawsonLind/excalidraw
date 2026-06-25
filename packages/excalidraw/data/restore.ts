@@ -202,6 +202,7 @@ export const AllowedExcalidrawActiveTools: Record<
   selection: true,
   lasso: true,
   text: true,
+  stickynote: true,
   rectangle: true,
   diamond: true,
   ellipse: true,

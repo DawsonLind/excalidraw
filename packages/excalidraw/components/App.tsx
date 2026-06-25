@@ -275,6 +275,7 @@ import type {
   ExcalidrawGenericElement,
   ExcalidrawLinearElement,
   ExcalidrawTextElement,
+  ExcalidrawRectangleElement,
   NonDeleted,
   InitializedExcalidrawImageElement,
   ExcalidrawImageElement,
@@ -9651,7 +9652,7 @@ class App extends React.Component<AppProps, AppState> {
       roundness: STICKY_NOTE_DEFAULTS.roundness,
       locked: false,
       frameId: topLayerFrame ? topLayerFrame.id : null,
-    });
+    }) as NonDeleted<ExcalidrawRectangleElement>;
 
     this.insertNewElement(stickyNote);
     this.setState({
