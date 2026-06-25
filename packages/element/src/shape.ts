@@ -259,11 +259,11 @@ export const generateRoughOptions = (
   }
 };
 
-const modifyIframeLikeForRoughOptions = (
-  element: NonDeletedExcalidrawElement,
+const modifyIframeLikeForRoughOptions = <T extends NonDeletedExcalidrawElement>(
+  element: T,
   isExporting: boolean,
   embedsValidationStatus: EmbedsValidationStatus | null,
-) => {
+): T => {
   if (
     isIframeLikeElement(element) &&
     (isExporting ||
@@ -277,7 +277,7 @@ const modifyIframeLikeForRoughOptions = (
       roughness: 0,
       backgroundColor: "#d3d3d3",
       fillStyle: "solid",
-    } as const;
+    } as T;
   } else if (isIframeElement(element)) {
     return {
       ...element,
@@ -287,7 +287,7 @@ const modifyIframeLikeForRoughOptions = (
       backgroundColor: isTransparent(element.backgroundColor)
         ? "#f4f4f6"
         : element.backgroundColor,
-    };
+    } as T;
   }
   return element;
 };
@@ -312,10 +312,7 @@ const getFillOnlyOptions = (options: Options): Options => ({
   stroke: "none",
 });
 
-const getStrokeOnlyOptions = (
-  options: Options,
-  seedOffset = 0,
-): Options => {
+const getStrokeOnlyOptions = (options: Options, seedOffset = 0): Options => {
   const strokeOnlyOptions: Options = {
     ...options,
     seed: options.seed !== undefined ? options.seed + seedOffset : undefined,
@@ -336,11 +333,11 @@ const getRoundedRectanglePath = (
     x + width
   } ${y + radius} L ${x + width} ${y + height - radius} Q ${x + width} ${
     y + height
-  }, ${x + width - radius} ${y + height} L ${x + radius} ${
+  }, ${x + width - radius} ${y + height} L ${x + radius} ${y + height} Q ${x} ${
     y + height
-  } Q ${x} ${y + height}, ${x} ${y + height - radius} L ${x} ${
-    y + radius
-  } Q ${x} ${y}, ${x + radius} ${y}`;
+  }, ${x} ${y + height - radius} L ${x} ${y + radius} Q ${x} ${y}, ${
+    x + radius
+  } ${y}`;
 
 const generateRectanguloidShape = (
   element: Extract<
@@ -380,7 +377,11 @@ const generateDoubleStrokeRectanguloidShapes = (
   generator: RoughGenerator,
   isDarkMode: boolean,
 ) => {
-  const options = generateRoughOptions(element, !!element.roundness, isDarkMode);
+  const options = generateRoughOptions(
+    element,
+    !!element.roundness,
+    isDarkMode,
+  );
   const shapes: Drawable[] = [];
 
   if (options.fill) {
@@ -457,9 +458,9 @@ const getRoundedDiamondPath = (
   return `M ${topX + verticalRadius} ${topY + horizontalRadius} L ${
     rightX - verticalRadius
   } ${rightY - horizontalRadius}
-    C ${rightX} ${rightY}, ${rightX} ${rightY}, ${
-    rightX - verticalRadius
-  } ${rightY + horizontalRadius}
+    C ${rightX} ${rightY}, ${rightX} ${rightY}, ${rightX - verticalRadius} ${
+    rightY + horizontalRadius
+  }
     L ${bottomX + verticalRadius} ${bottomY - horizontalRadius}
     C ${bottomX} ${bottomY}, ${bottomX} ${bottomY}, ${
     bottomX - verticalRadius
@@ -503,7 +504,11 @@ const generateDoubleStrokeDiamondShapes = (
   generator: RoughGenerator,
   isDarkMode: boolean,
 ) => {
-  const options = generateRoughOptions(element, !!element.roundness, isDarkMode);
+  const options = generateRoughOptions(
+    element,
+    !!element.roundness,
+    isDarkMode,
+  );
   const shapes: Drawable[] = [];
 
   if (options.fill) {
@@ -1189,7 +1194,11 @@ const _generateElementShape = (
       let shape: ElementShapes[typeof element.type];
 
       if (element.strokeStyle === "double") {
-        return generateDoubleStrokeDiamondShapes(element, generator, isDarkMode);
+        return generateDoubleStrokeDiamondShapes(
+          element,
+          generator,
+          isDarkMode,
+        );
       }
 
       const [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] =
@@ -1238,7 +1247,11 @@ const _generateElementShape = (
     }
     case "ellipse": {
       if (element.strokeStyle === "double") {
-        return generateDoubleStrokeEllipseShapes(element, generator, isDarkMode);
+        return generateDoubleStrokeEllipseShapes(
+          element,
+          generator,
+          isDarkMode,
+        );
       }
 
       const shape: ElementShapes[typeof element.type] = generator.ellipse(
@@ -1262,7 +1275,11 @@ const _generateElementShape = (
         : [pointFrom<LocalPoint>(0, 0)];
 
       if (element.strokeStyle === "double") {
-        shape = generateDoubleStrokeLinearShapes(element, generator, isDarkMode);
+        shape = generateDoubleStrokeLinearShapes(
+          element,
+          generator,
+          isDarkMode,
+        );
       } else if (isElbowArrow(element)) {
         // NOTE (mtolmacs): Temporary fix for extremely big arrow shapes
         if (
