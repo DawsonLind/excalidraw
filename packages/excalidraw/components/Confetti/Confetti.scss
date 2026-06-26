@@ -1,0 +1,57 @@
+.excalidraw {
+  .excalidraw-confetti {
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: var(--zIndex-layerUI);
+
+    &__piece {
+      animation: excalidraw-confetti-burst var(--confetti-duration)
+        cubic-bezier(0.12, 0.72, 0.34, 1) var(--confetti-delay) forwards;
+      background: var(--confetti-color);
+      border-radius: 2px;
+      height: var(--confetti-height);
+      left: var(--confetti-left);
+      opacity: 0;
+      position: absolute;
+      top: var(--confetti-top);
+      transform: translate(-50%, -50%) rotate(0deg);
+      width: var(--confetti-width);
+      will-change: transform, opacity;
+    }
+  }
+}
+
+@keyframes excalidraw-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--confetti-x)),
+        calc(-50% + var(--confetti-y))
+      )
+      scale(1) rotate(var(--confetti-rotate));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .excalidraw {
+    .excalidraw-confetti__piece {
+      animation-duration: 300ms;
+      animation-timing-function: ease-out;
+    }
+  }
+}
