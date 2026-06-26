@@ -34,7 +34,11 @@ import type {
   Zoom,
 } from "@excalidraw/excalidraw/types";
 
-import { elementCenterPoint, getDiamondPoints } from "./bounds";
+import {
+  elementCenterPoint,
+  getDiamondPoints,
+  getTrianglePoints,
+} from "./bounds";
 
 import { generateLinearCollisionShape } from "./shape";
 
@@ -57,6 +61,7 @@ import type {
   ExcalidrawFreeDrawElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
+  ExcalidrawTriangleElement,
 } from "./types";
 
 type ElementShape = [LineSegment<GlobalPoint>[], Curve<GlobalPoint>[]];
@@ -462,6 +467,55 @@ export function deconstructDiamondElement(
   return shape;
 }
 
+export function deconstructTriangleElement(
+  element: ExcalidrawTriangleElement,
+  offset: number = 0,
+): [LineSegment<GlobalPoint>[], Curve<GlobalPoint>[]] {
+  const cachedShape = getElementShapesCacheEntry(element, offset);
+
+  if (cachedShape) {
+    return cachedShape;
+  }
+
+  const [topX, topY, leftX, leftY, rightX, rightY] = getTrianglePoints(element);
+  const vertices = [
+    pointFrom<GlobalPoint>(element.x + topX, element.y + topY),
+    pointFrom<GlobalPoint>(element.x + leftX, element.y + leftY),
+    pointFrom<GlobalPoint>(element.x + rightX, element.y + rightY),
+  ];
+
+  const center = pointFrom<GlobalPoint>(
+    element.x + element.width / 2,
+    element.y + element.height / 2,
+  );
+  const offsetVertices =
+    offset === 0
+      ? vertices
+      : vertices.map((vertex) => {
+          const distance = pointDistance(vertex, center);
+          if (distance === 0) {
+            return vertex;
+          }
+          const ratio = (distance + offset) / distance;
+          return pointFrom<GlobalPoint>(
+            center[0] + (vertex[0] - center[0]) * ratio,
+            center[1] + (vertex[1] - center[1]) * ratio,
+          );
+        });
+
+  const sides = [
+    lineSegment<GlobalPoint>(offsetVertices[0], offsetVertices[1]),
+    lineSegment<GlobalPoint>(offsetVertices[1], offsetVertices[2]),
+    lineSegment<GlobalPoint>(offsetVertices[2], offsetVertices[0]),
+  ];
+
+  const shape = [sides, []] as ElementShape;
+
+  setElementShapesCacheEntry(element, shape, offset);
+
+  return shape;
+}
+
 // Checks if the first and last point are close enough
 // to be considered a loop
 export const isPathALoop = (
@@ -602,6 +656,21 @@ export const getSnapOutlineMidPoint = (
 
           return pointFrom<GlobalPoint>(rotatedPoint[0], rotatedPoint[1]);
         })
+      : element.type === "triangle"
+      ? [
+          pointFrom<GlobalPoint>(
+            element.x + element.width / 4,
+            element.y + element.height / 2,
+          ),
+          pointFrom<GlobalPoint>(
+            element.x + element.width / 2,
+            element.y + element.height,
+          ),
+          pointFrom<GlobalPoint>(
+            element.x + (element.width * 3) / 4,
+            element.y + element.height / 2,
+          ),
+        ].map((point) => pointRotateRads(point, center, element.angle))
       : [
           // RIGHT midpoint
           pointRotateRads(

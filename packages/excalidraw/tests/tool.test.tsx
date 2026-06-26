@@ -59,6 +59,14 @@ describe("setActiveTool()", () => {
     expect(h.state.activeTool.type).toBe("rectangle");
   });
 
+  it("should set triangle as the active tool type", async () => {
+    expect(h.state.activeTool.type).toBe("selection");
+    act(() => {
+      excalidrawAPI.setActiveTool({ type: "triangle" });
+    });
+    expect(h.state.activeTool.type).toBe("triangle");
+  });
+
   it("should set custom tool", async () => {
     expect(h.state.activeTool.type).toBe("selection");
     act(() => {
@@ -81,6 +89,7 @@ describe("getToolbarTools()", () => {
   it("does not include lasso when selection is preferred", () => {
     const toolValues = getToolValues("selection");
 
+    expect(toolValues).toContain("triangle");
     expect(toolValues.filter((value) => value === "selection")).toHaveLength(1);
     expect(toolValues.filter((value) => value === "lasso")).toHaveLength(0);
   });

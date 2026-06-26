@@ -46,6 +46,7 @@ import { getElementShape } from "./shape";
 import {
   deconstructDiamondElement,
   deconstructRectanguloidElement,
+  deconstructTriangleElement,
 } from "./utils";
 import { intersectElementWithLineSegment } from "./collision";
 import { elementOverlapsWithFrame, getContainingFrame } from "./frame";
@@ -62,6 +63,7 @@ import type {
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
   ExcalidrawTextElementWithContainer,
+  ExcalidrawTriangleElement,
   NonDeleted,
   NonDeletedExcalidrawElement,
 } from "./types";
@@ -200,6 +202,30 @@ export class ElementBounds {
       const maxX = Math.max(x11, x12, x22, x21);
       const maxY = Math.max(y11, y12, y22, y21);
       bounds = [minX, minY, maxX, maxY];
+    } else if (element.type === "triangle") {
+      const [topX, topY, leftX, leftY, rightX, rightY] =
+        getTrianglePoints(element);
+      const [x11, y11] = pointRotateRads(
+        pointFrom(element.x + topX, element.y + topY),
+        pointFrom(cx, cy),
+        element.angle,
+      );
+      const [x12, y12] = pointRotateRads(
+        pointFrom(element.x + leftX, element.y + leftY),
+        pointFrom(cx, cy),
+        element.angle,
+      );
+      const [x13, y13] = pointRotateRads(
+        pointFrom(element.x + rightX, element.y + rightY),
+        pointFrom(cx, cy),
+        element.angle,
+      );
+      bounds = [
+        Math.min(x11, x12, x13),
+        Math.min(y11, y12, y13),
+        Math.max(x11, x12, x13),
+        Math.max(y11, y12, y13),
+      ];
     } else if (element.type === "ellipse") {
       const w = (x2 - x1) / 2;
       const h = (y2 - y1) / 2;
@@ -366,6 +392,9 @@ export const getElementLineSegments = (
     const rotatedSides = getRotatedSides(sides, center, element.angle);
 
     return [...rotatedSides, ...cornerSegments];
+  } else if (element.type === "triangle") {
+    const [sides] = deconstructTriangleElement(element);
+    return getRotatedSides(sides, center, element.angle);
   } else if (shape.type === "polygon") {
     if (isTextElement(element)) {
       const container = getContainerElement(element, elementsMap);
@@ -532,6 +561,18 @@ export const getDiamondPoints = (element: ExcalidrawElement) => {
   const leftY = rightY;
 
   return [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY];
+};
+
+export const getTrianglePoints = (element: ExcalidrawTriangleElement) => {
+  // Add +1 to the apex x coordinate to avoid zero-sized roughjs edge cases.
+  const topX = Math.floor(element.width / 2) + 1;
+  const topY = 0;
+  const leftX = 0;
+  const leftY = element.height;
+  const rightX = element.width;
+  const rightY = element.height;
+
+  return [topX, topY, leftX, leftY, rightX, rightY];
 };
 
 // reference: https://eliot-jones.com/2019/12/cubic-bezier-curve-bounding-boxes

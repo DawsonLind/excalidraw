@@ -35,6 +35,7 @@ import {
   getCubicBezierCurveBound,
   getDiamondPoints,
   getElementBounds,
+  getTrianglePoints,
   pointInsideBounds,
 } from "./bounds";
 import {
@@ -51,6 +52,7 @@ import {
   deconstructDiamondElement,
   deconstructLinearOrFreeDrawElement,
   deconstructRectanguloidElement,
+  deconstructTriangleElement,
 } from "./utils";
 
 import { getBoundTextElement } from "./textElement";
@@ -73,6 +75,7 @@ import type {
   ExcalidrawFreeDrawElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
+  ExcalidrawTriangleElement,
   NonDeleted,
   NonDeletedExcalidrawElement,
   NonDeletedSceneElementsMap,
@@ -471,6 +474,14 @@ export const intersectElementWithLineSegment = (
         offset,
         onlyFirst,
       );
+    case "triangle":
+      return intersectTriangleWithLineSegment(
+        element,
+        elementsMap,
+        line,
+        offset,
+        onlyFirst,
+      );
     case "ellipse":
       return intersectEllipseWithLineSegment(
         element,
@@ -707,6 +718,31 @@ const intersectDiamondWithLineSegment = (
   return intersections;
 };
 
+const intersectTriangleWithLineSegment = (
+  element: ExcalidrawTriangleElement,
+  elementsMap: ElementsMap,
+  l: LineSegment<GlobalPoint>,
+  offset: number = 0,
+  onlyFirst = false,
+): GlobalPoint[] => {
+  const center = elementCenterPoint(element, elementsMap);
+  const rotatedA = pointRotateRads(l[0], center, -element.angle as Radians);
+  const rotatedB = pointRotateRads(l[1], center, -element.angle as Radians);
+  const rotatedIntersector = lineSegment(rotatedA, rotatedB);
+
+  const [sides] = deconstructTriangleElement(element, offset);
+  const intersections: GlobalPoint[] = [];
+
+  return lineIntersections(
+    sides,
+    rotatedIntersector,
+    intersections,
+    center,
+    element.angle,
+    onlyFirst,
+  );
+};
+
 /**
  *
  * @param element
@@ -812,6 +848,16 @@ export const isBindableElementInsideOtherBindable = (
         pointFrom(x + rightX + offset, y + rightY), // right
         pointFrom(x + bottomX, y + bottomY + offset), // bottom
         pointFrom(x + leftX - offset, y + leftY), // left
+      ];
+      return corners.map((corner) => pointRotateRads(corner, center, angle));
+    }
+    if (element.type === "triangle") {
+      const [topX, topY, leftX, leftY, rightX, rightY] =
+        getTrianglePoints(element);
+      const corners: GlobalPoint[] = [
+        pointFrom(x + topX, y + topY - offset),
+        pointFrom(x + leftX - offset, y + leftY + offset),
+        pointFrom(x + rightX + offset, y + rightY + offset),
       ];
       return corners.map((corner) => pointRotateRads(corner, center, angle));
     }
