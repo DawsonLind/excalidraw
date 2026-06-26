@@ -216,10 +216,7 @@ const getOffsetLinearPoints = (
     return null;
   }
 
-  const getOffsetPoint = (
-    index: number,
-    direction: 1 | -1,
-  ): RoughPoint => {
+  const getOffsetPoint = (index: number, direction: 1 | -1): RoughPoint => {
     const prev = points[Math.max(0, index - 1)];
     const next = points[Math.min(points.length - 1, index + 1)];
     const dx = next[0] - prev[0];
@@ -304,9 +301,10 @@ export const generateRoughOptions = (
     disableMultiStroke: element.strokeStyle !== "solid",
     // for non-solid strokes, increase the width a bit to make it visually
     // similar to solid strokes, because we're also disabling multiStroke
-    strokeWidth: hasDashedStroke || hasDottedStroke
-      ? element.strokeWidth + 0.5
-      : element.strokeWidth,
+    strokeWidth:
+      hasDashedStroke || hasDottedStroke
+        ? element.strokeWidth + 0.5
+        : element.strokeWidth,
     // when increasing strokeWidth, we must explicitly set fillWeight and
     // hachureGap because if not specified, roughjs uses strokeWidth to
     // calculate them (and we don't want the fills to be modified)
@@ -919,9 +917,7 @@ const _generateElementShape = (
                   inset + innerWidth
                 } ${
                   inset + innerHeight - Math.min(radius, innerHeight / 2)
-                } Q ${
-                  inset + innerWidth
-                } ${inset + innerHeight}, ${
+                } Q ${inset + innerWidth} ${inset + innerHeight}, ${
                   inset + innerWidth - Math.min(radius, innerWidth / 2)
                 } ${inset + innerHeight} L ${
                   inset + Math.min(radius, innerWidth / 2)
@@ -1126,7 +1122,12 @@ const _generateElementShape = (
                 generator.linearPath(offsetPoints[0], options),
                 generator.linearPath(offsetPoints[1], options),
               ]
-            : [generator.linearPath(points as unknown as RoughPoint[], options)];
+            : [
+                generator.linearPath(
+                  points as unknown as RoughPoint[],
+                  options,
+                ),
+              ];
         }
       } else if (isElbowArrow(element)) {
         // NOTE (mtolmacs): Temporary fix for extremely big arrow shapes
