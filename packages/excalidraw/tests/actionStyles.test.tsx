@@ -83,4 +83,14 @@ describe("actionStyles", () => {
     expect(firstRect.roughness).toBe(2); // Cartoonist: 2
     expect(firstRect.opacity).toBe(60);
   });
+
+  it("should apply double stroke style", async () => {
+    UI.clickTool("rectangle");
+    mouse.down(10, 10);
+    mouse.up(40, 40);
+
+    fireEvent.click(screen.getByTitle("Double"));
+
+    expect(API.getSelectedElement().strokeStyle).toBe("double");
+  });
 });
