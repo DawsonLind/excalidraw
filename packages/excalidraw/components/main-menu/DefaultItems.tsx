@@ -48,6 +48,7 @@ import {
 } from "../icons";
 import {
   boltIcon,
+  confettiIcon,
   DeviceDesktopIcon,
   ExportIcon,
   ExportImageIcon,
@@ -60,6 +61,7 @@ import {
   TrashIcon,
   usersIcon,
 } from "../icons";
+import { confettiTriggerAtom } from "../Confetti/Confetti";
 
 import "./DefaultItems.scss";
 
@@ -164,6 +166,25 @@ export const CommandPalette = (opts?: { className?: string }) => {
   );
 };
 CommandPalette.displayName = "CommandPalette";
+
+export const Confetti = () => {
+  const { t } = useI18n();
+  const app = useApp();
+
+  return (
+    <DropdownMenuItem
+      icon={confettiIcon}
+      data-testid="confetti-button"
+      onSelect={() => {
+        app.updateEditorAtom(confettiTriggerAtom, (trigger) => trigger + 1);
+      }}
+      aria-label={t("labels.confetti")}
+    >
+      {t("labels.confetti")}
+    </DropdownMenuItem>
+  );
+};
+Confetti.displayName = "Confetti";
 
 export const SearchMenu = (opts?: { className?: string }) => {
   const { t } = useI18n();
