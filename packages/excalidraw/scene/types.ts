@@ -160,11 +160,11 @@ export type ElementShape =
   | null;
 
 export type ElementShapes = {
-  rectangle: Drawable;
-  ellipse: Drawable;
-  diamond: Drawable;
-  iframe: Drawable;
-  embeddable: Drawable;
+  rectangle: Drawable | Drawable[];
+  ellipse: Drawable | Drawable[];
+  diamond: Drawable | Drawable[];
+  iframe: Drawable | Drawable[];
+  embeddable: Drawable | Drawable[];
   freedraw: (Drawable | SVGPathString)[];
   arrow: Drawable[];
   line: Drawable[];

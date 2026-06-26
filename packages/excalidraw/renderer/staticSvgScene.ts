@@ -63,6 +63,17 @@ const roughSVGDrawWithPrecision = (
   return rsvg.draw(pshape);
 };
 
+const roughSVGDrawAllWithPrecision = (
+  rsvg: RoughSVG,
+  drawable: Drawable | Drawable[],
+  precision?: number,
+) => {
+  const drawables = Array.isArray(drawable) ? drawable : [drawable];
+  return drawables.map((subshape) =>
+    roughSVGDrawWithPrecision(rsvg, subshape, precision),
+  );
+};
+
 const maybeWrapNodesInFrameClipPath = (
   element: NonDeletedExcalidrawElement,
   root: SVGElement,
@@ -149,56 +160,74 @@ const renderElementToSvg = (
     case "diamond":
     case "ellipse": {
       const shape = ShapeCache.generateElementShape(element, renderConfig);
-      const node = roughSVGDrawWithPrecision(
+      const nodes = roughSVGDrawAllWithPrecision(
         rsvg,
         shape,
         MAX_DECIMALS_FOR_SVG_EXPORT,
       );
-      if (opacity !== 1) {
-        node.setAttribute("stroke-opacity", `${opacity}`);
-        node.setAttribute("fill-opacity", `${opacity}`);
-      }
-      node.setAttribute("stroke-linecap", "round");
-      node.setAttribute(
-        "transform",
-        `translate(${offsetX || 0} ${
-          offsetY || 0
-        }) rotate(${degree} ${cx} ${cy})`,
-      );
+      nodes.forEach((node) => {
+        if (opacity !== 1) {
+          node.setAttribute("stroke-opacity", `${opacity}`);
+          node.setAttribute("fill-opacity", `${opacity}`);
+        }
+        node.setAttribute("stroke-linecap", "round");
+        node.setAttribute(
+          "transform",
+          `translate(${offsetX || 0} ${
+            offsetY || 0
+          }) rotate(${degree} ${cx} ${cy})`,
+        );
+      });
 
       const g = maybeWrapNodesInFrameClipPath(
         element,
         root,
-        [node],
+        nodes,
         renderConfig.frameRendering,
         elementsMap,
       );
 
-      addToRoot(g || node, element);
+      if (g) {
+        addToRoot(g, element);
+      } else if (nodes.length === 1) {
+        addToRoot(nodes[0], element);
+      } else {
+        const group = svgRoot.ownerDocument.createElementNS(SVG_NS, "g");
+        nodes.forEach((node) => group.appendChild(node));
+        addToRoot(group, element);
+      }
       break;
     }
     case "iframe":
     case "embeddable": {
       // render placeholder rectangle
       const shape = ShapeCache.generateElementShape(element, renderConfig);
-      const node = roughSVGDrawWithPrecision(
+      const nodes = roughSVGDrawAllWithPrecision(
         rsvg,
         shape,
         MAX_DECIMALS_FOR_SVG_EXPORT,
       );
       const opacity = element.opacity / 100;
-      if (opacity !== 1) {
-        node.setAttribute("stroke-opacity", `${opacity}`);
-        node.setAttribute("fill-opacity", `${opacity}`);
+      nodes.forEach((node) => {
+        if (opacity !== 1) {
+          node.setAttribute("stroke-opacity", `${opacity}`);
+          node.setAttribute("fill-opacity", `${opacity}`);
+        }
+        node.setAttribute("stroke-linecap", "round");
+        node.setAttribute(
+          "transform",
+          `translate(${offsetX || 0} ${
+            offsetY || 0
+          }) rotate(${degree} ${cx} ${cy})`,
+        );
+      });
+      if (nodes.length === 1) {
+        addToRoot(nodes[0], element);
+      } else {
+        const group = svgRoot.ownerDocument.createElementNS(SVG_NS, "g");
+        nodes.forEach((node) => group.appendChild(node));
+        addToRoot(group, element);
       }
-      node.setAttribute("stroke-linecap", "round");
-      node.setAttribute(
-        "transform",
-        `translate(${offsetX || 0} ${
-          offsetY || 0
-        }) rotate(${degree} ${cx} ${cy})`,
-      );
-      addToRoot(node, element);
 
       const label: ExcalidrawElement =
         createPlaceholderEmbeddableLabel(element);
@@ -216,7 +245,7 @@ const renderElementToSvg = (
       // render embeddable element + iframe
       const embeddableNode = roughSVGDrawWithPrecision(
         rsvg,
-        shape,
+        Array.isArray(shape) ? shape[0] : shape,
         MAX_DECIMALS_FOR_SVG_EXPORT,
       );
       embeddableNode.setAttribute("stroke-linecap", "round");

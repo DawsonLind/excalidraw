@@ -169,6 +169,98 @@ const getDashArrayDashed = (strokeWidth: number) => [8, 8 + strokeWidth];
 
 const getDashArrayDotted = (strokeWidth: number) => [1.5, 6 + strokeWidth];
 
+const getDoubleStrokeOffset = (strokeWidth: number) =>
+  Math.max(3, strokeWidth * 2.5);
+
+const withoutFill = (options: Options): Options => {
+  const outlineOptions = { ...options };
+  delete outlineOptions.fill;
+  delete outlineOptions.fillStyle;
+  return outlineOptions;
+};
+
+const withoutStroke = (options: Options): Options => ({
+  ...options,
+  stroke: "none",
+});
+
+const getInset = (width: number, height: number, offset: number) =>
+  Math.min(offset, Math.max(0, Math.min(width, height) / 2 - 1));
+
+const getInsetDiamondPoints = (
+  element: ExcalidrawElement,
+  offset: number,
+): RoughPoint[] | null => {
+  const inset = getInset(element.width, element.height, offset);
+  if (!inset) {
+    return null;
+  }
+  const width = element.width - inset * 2;
+  const height = element.height - inset * 2;
+  if (width <= 0 || height <= 0) {
+    return null;
+  }
+  return [
+    [inset + width / 2, inset],
+    [inset + width, inset + height / 2],
+    [inset + width / 2, inset + height],
+    [inset, inset + height / 2],
+  ];
+};
+
+const getOffsetLinearPoints = (
+  points: readonly LocalPoint[],
+  offset: number,
+): [RoughPoint[], RoughPoint[]] | null => {
+  if (points.length < 2) {
+    return null;
+  }
+
+  const getOffsetPoint = (
+    index: number,
+    direction: 1 | -1,
+  ): RoughPoint => {
+    const prev = points[Math.max(0, index - 1)];
+    const next = points[Math.min(points.length - 1, index + 1)];
+    const dx = next[0] - prev[0];
+    const dy = next[1] - prev[1];
+    const length = Math.hypot(dx, dy) || 1;
+    const nx = (-dy / length) * offset * direction;
+    const ny = (dx / length) * offset * direction;
+
+    return [points[index][0] + nx, points[index][1] + ny];
+  };
+
+  return [
+    points.map((_, index) => getOffsetPoint(index, 1)),
+    points.map((_, index) => getOffsetPoint(index, -1)),
+  ];
+};
+
+const getInsetLinearPoints = (
+  points: readonly LocalPoint[],
+  offset: number,
+): RoughPoint[] => {
+  const xs = points.map((point) => point[0]);
+  const ys = points.map((point) => point[1]);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const inset = getInset(width, height, offset);
+  const centerX = minX + width / 2;
+  const centerY = minY + height / 2;
+  const scaleX = width ? Math.max(0, width - inset * 2) / width : 1;
+  const scaleY = height ? Math.max(0, height - inset * 2) / height : 1;
+
+  return points.map((point) => [
+    centerX + (point[0] - centerX) * scaleX,
+    centerY + (point[1] - centerY) * scaleY,
+  ]);
+};
+
 function adjustRoughness(element: ExcalidrawElement): number {
   const roughness = element.roughness;
 
@@ -197,23 +289,24 @@ export const generateRoughOptions = (
   continuousPath = false,
   isDarkMode: boolean = false,
 ): Options => {
+  const hasDashedStroke = element.strokeStyle === "dashed";
+  const hasDottedStroke = element.strokeStyle === "dotted";
+
   const options: Options = {
     seed: element.seed,
-    strokeLineDash:
-      element.strokeStyle === "dashed"
-        ? getDashArrayDashed(element.strokeWidth)
-        : element.strokeStyle === "dotted"
-        ? getDashArrayDotted(element.strokeWidth)
-        : undefined,
+    strokeLineDash: hasDashedStroke
+      ? getDashArrayDashed(element.strokeWidth)
+      : hasDottedStroke
+      ? getDashArrayDotted(element.strokeWidth)
+      : undefined,
     // for non-solid strokes, disable multiStroke because it tends to make
-    // dashes/dots overlay each other
+    // dashes/dots overlay each other. Double lines use separate paths.
     disableMultiStroke: element.strokeStyle !== "solid",
     // for non-solid strokes, increase the width a bit to make it visually
     // similar to solid strokes, because we're also disabling multiStroke
-    strokeWidth:
-      element.strokeStyle !== "solid"
-        ? element.strokeWidth + 0.5
-        : element.strokeWidth,
+    strokeWidth: hasDashedStroke || hasDottedStroke
+      ? element.strokeWidth + 0.5
+      : element.strokeWidth,
     // when increasing strokeWidth, we must explicitly set fillWeight and
     // hachureGap because if not specified, roughjs uses strokeWidth to
     // calculate them (and we don't want the fills to be modified)
@@ -771,28 +864,31 @@ const _generateElementShape = (
     case "iframe":
     case "embeddable": {
       let shape: ElementShapes[typeof element.type];
+      const options = generateRoughOptions(
+        modifyIframeLikeForRoughOptions(
+          element,
+          isExporting,
+          embedsValidationStatus,
+        ),
+        !!element.roundness,
+        isDarkMode,
+      );
+      const radius = element.roundness
+        ? getCornerRadius(Math.min(element.width, element.height), element)
+        : 0;
       // this is for rendering the stroke/bg of the embeddable, especially
       // when the src url is not set
 
       if (element.roundness) {
         const w = element.width;
         const h = element.height;
-        const r = getCornerRadius(Math.min(w, h), element);
         shape = generator.path(
-          `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${
-            h - r
-          } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${
-            h - r
-          } L 0 ${r} Q 0 0, ${r} 0`,
-          generateRoughOptions(
-            modifyIframeLikeForRoughOptions(
-              element,
-              isExporting,
-              embedsValidationStatus,
-            ),
-            true,
-            isDarkMode,
-          ),
+          `M ${radius} 0 L ${w - radius} 0 Q ${w} 0, ${w} ${radius} L ${w} ${
+            h - radius
+          } Q ${w} ${h}, ${w - radius} ${h} L ${radius} ${h} Q 0 ${h}, 0 ${
+            h - radius
+          } L 0 ${radius} Q 0 0, ${radius} 0`,
+          options,
         );
       } else {
         shape = generator.rectangle(
@@ -800,21 +896,65 @@ const _generateElementShape = (
           0,
           element.width,
           element.height,
-          generateRoughOptions(
-            modifyIframeLikeForRoughOptions(
-              element,
-              isExporting,
-              embedsValidationStatus,
-            ),
-            false,
-            isDarkMode,
-          ),
+          options,
         );
+      }
+      if (element.strokeStyle === "double") {
+        const inset = getInset(
+          element.width,
+          element.height,
+          getDoubleStrokeOffset(element.strokeWidth),
+        );
+        if (inset) {
+          const innerWidth = element.width - inset * 2;
+          const innerHeight = element.height - inset * 2;
+          const innerOptions = withoutFill(options);
+          const innerShape = element.roundness
+            ? generator.path(
+                `M ${inset + Math.min(radius, innerWidth / 2)} ${inset} L ${
+                  inset + innerWidth - Math.min(radius, innerWidth / 2)
+                } ${inset} Q ${inset + innerWidth} ${inset}, ${
+                  inset + innerWidth
+                } ${inset + Math.min(radius, innerHeight / 2)} L ${
+                  inset + innerWidth
+                } ${
+                  inset + innerHeight - Math.min(radius, innerHeight / 2)
+                } Q ${
+                  inset + innerWidth
+                } ${inset + innerHeight}, ${
+                  inset + innerWidth - Math.min(radius, innerWidth / 2)
+                } ${inset + innerHeight} L ${
+                  inset + Math.min(radius, innerWidth / 2)
+                } ${inset + innerHeight} Q ${inset} ${
+                  inset + innerHeight
+                }, ${inset} ${
+                  inset + innerHeight - Math.min(radius, innerHeight / 2)
+                } L ${inset} ${
+                  inset + Math.min(radius, innerHeight / 2)
+                } Q ${inset} ${inset}, ${
+                  inset + Math.min(radius, innerWidth / 2)
+                } ${inset}`,
+                innerOptions,
+              )
+            : generator.rectangle(
+                inset,
+                inset,
+                innerWidth,
+                innerHeight,
+                innerOptions,
+              );
+          shape = [shape, innerShape] as ElementShapes[typeof element.type];
+        }
       }
       return shape;
     }
     case "diamond": {
       let shape: ElementShapes[typeof element.type];
+      const options = generateRoughOptions(
+        element,
+        !!element.roundness,
+        isDarkMode,
+      );
 
       const [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY] =
         getDiamondPoints(element);
@@ -845,7 +985,7 @@ const _generateElementShape = (
             C ${topX} ${topY}, ${topX} ${topY}, ${topX + verticalRadius} ${
             topY + horizontalRadius
           }`,
-          generateRoughOptions(element, true, isDarkMode),
+          options,
         );
       } else {
         shape = generator.polygon(
@@ -855,19 +995,51 @@ const _generateElementShape = (
             [bottomX, bottomY],
             [leftX, leftY],
           ],
-          generateRoughOptions(element, false, isDarkMode),
+          options,
         );
+      }
+      if (element.strokeStyle === "double") {
+        const insetPoints = getInsetDiamondPoints(
+          element,
+          getDoubleStrokeOffset(element.strokeWidth),
+        );
+        if (insetPoints) {
+          shape = [
+            shape,
+            generator.polygon(insetPoints, withoutFill(options)),
+          ] as ElementShapes[typeof element.type];
+        }
       }
       return shape;
     }
     case "ellipse": {
+      const options = generateRoughOptions(element, false, isDarkMode);
       const shape: ElementShapes[typeof element.type] = generator.ellipse(
         element.width / 2,
         element.height / 2,
         element.width,
         element.height,
-        generateRoughOptions(element, false, isDarkMode),
+        options,
       );
+      if (element.strokeStyle === "double") {
+        const inset = getInset(
+          element.width,
+          element.height,
+          getDoubleStrokeOffset(element.strokeWidth),
+        );
+        if (inset) {
+          return [
+            shape,
+            generator.ellipse(
+              element.width / 2,
+              element.height / 2,
+              element.width - inset * 2,
+              element.height - inset * 2,
+              withoutFill(options),
+            ),
+          ] as ElementShapes[typeof element.type];
+        }
+      }
       return shape;
     }
     case "line":
@@ -881,7 +1053,82 @@ const _generateElementShape = (
         ? element.points
         : [pointFrom<LocalPoint>(0, 0)];
 
-      if (isElbowArrow(element)) {
+      if (element.strokeStyle === "double" && isElbowArrow(element)) {
+        if (
+          !points.every(
+            (point) => Math.abs(point[0]) <= 1e6 && Math.abs(point[1]) <= 1e6,
+          )
+        ) {
+          console.error(
+            `Elbow arrow with extreme point positions detected. Arrow not rendered.`,
+            element.id,
+            JSON.stringify(points),
+          );
+          shape = [];
+        } else {
+          const offsetPoints = getOffsetLinearPoints(
+            points,
+            getDoubleStrokeOffset(element.strokeWidth),
+          );
+          shape = [
+            generator.path(
+              generateElbowArrowShape(points, 16),
+              withoutStroke(withoutFill(options)),
+            ),
+            ...(offsetPoints
+              ? [
+                  generator.path(
+                    generateElbowArrowShape(
+                      offsetPoints[0] as unknown as LocalPoint[],
+                      16,
+                    ),
+                    withoutFill(options),
+                  ),
+                  generator.path(
+                    generateElbowArrowShape(
+                      offsetPoints[1] as unknown as LocalPoint[],
+                      16,
+                    ),
+                    withoutFill(options),
+                  ),
+                ]
+              : [
+                  generator.path(
+                    generateElbowArrowShape(points, 16),
+                    withoutFill(options),
+                  ),
+                ]),
+          ];
+        }
+      } else if (element.strokeStyle === "double" && isPathALoop(points)) {
+        if (options.fill) {
+          shape = [
+            generator.polygon(points as unknown as RoughPoint[], options),
+            generator.linearPath(
+              getInsetLinearPoints(
+                points,
+                getDoubleStrokeOffset(element.strokeWidth),
+              ),
+              withoutFill(options),
+            ),
+          ];
+        } else {
+          const offsetPoints = getOffsetLinearPoints(
+            points,
+            getDoubleStrokeOffset(element.strokeWidth),
+          );
+          shape = offsetPoints
+            ? [
+                generator.linearPath(
+                  points as unknown as RoughPoint[],
+                  withoutStroke(withoutFill(options)),
+                ),
+                generator.linearPath(offsetPoints[0], options),
+                generator.linearPath(offsetPoints[1], options),
+              ]
+            : [generator.linearPath(points as unknown as RoughPoint[], options)];
+        }
+      } else if (isElbowArrow(element)) {
         // NOTE (mtolmacs): Temporary fix for extremely big arrow shapes
         if (
           !points.every(
@@ -902,6 +1149,38 @@ const _generateElementShape = (
             ),
           ];
         }
+      } else if (element.strokeStyle === "double") {
+        const offsetPoints = getOffsetLinearPoints(
+          points,
+          getDoubleStrokeOffset(element.strokeWidth),
+        );
+        const doubleOptions = withoutFill(options);
+        const referenceOptions = withoutStroke(doubleOptions);
+
+        shape = offsetPoints
+          ? element.roundness
+            ? [
+                generator.curve(
+                  points as unknown as RoughPoint[],
+                  referenceOptions,
+                ),
+                generator.curve(offsetPoints[0], doubleOptions),
+                generator.curve(offsetPoints[1], doubleOptions),
+              ]
+            : [
+                generator.linearPath(
+                  points as unknown as RoughPoint[],
+                  referenceOptions,
+                ),
+                generator.linearPath(offsetPoints[0], doubleOptions),
+                generator.linearPath(offsetPoints[1], doubleOptions),
+              ]
+          : [
+              generator.linearPath(
+                points as unknown as RoughPoint[],
+                doubleOptions,
+              ),
+            ];
       } else if (!element.roundness) {
         // curve is always the first element
         // this simplifies finding the curve for an element
@@ -920,12 +1199,28 @@ const _generateElementShape = (
 
       // add lines only in arrow
       if (element.type === "arrow") {
+        const arrowheadReferenceShape =
+          element.strokeStyle === "double"
+            ? [
+                isElbowArrow(element)
+                  ? generator.path(
+                      generateElbowArrowShape(points, 16),
+                      generateRoughOptions(element, true, isDarkMode),
+                    )
+                  : element.roundness
+                  ? generator.curve(points as unknown as RoughPoint[], options)
+                  : generator.linearPath(
+                      points as unknown as RoughPoint[],
+                      options,
+                    ),
+              ]
+            : shape;
         const { startArrowhead = null, endArrowhead = "arrow" } = element;
 
         if (startArrowhead !== null) {
           const shapes = getArrowheadShapes(
             element,
-            shape,
+            arrowheadReferenceShape,
             "start",
             startArrowhead,
             generator,
@@ -943,7 +1238,7 @@ const _generateElementShape = (
 
           const shapes = getArrowheadShapes(
             element,
-            shape,
+            arrowheadReferenceShape,
             "end",
             endArrowhead,
             generator,

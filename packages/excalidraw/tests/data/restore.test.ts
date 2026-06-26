@@ -670,6 +670,20 @@ describe("restoreElements", () => {
     });
   });
 
+  it("should restore double stroke style", () => {
+    const rectangle = API.createElement({
+      type: "rectangle",
+      strokeStyle: "double",
+    });
+
+    const restoredRectangle = restore.restoreElements(
+      [rectangle],
+      null,
+    )[0] as ExcalidrawElement;
+
+    expect(restoredRectangle.strokeStyle).toBe("double");
+  });
+
   it("bump versions of local duplicate elements when supplied", () => {
     const rectangle = API.createElement({ type: "rectangle" }); // version=1
     const ellipse = API.createElement({ type: "ellipse" });
