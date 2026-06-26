@@ -218,3 +218,35 @@ describe("hitElementItself cache", () => {
     ).toBe(true);
   });
 });
+
+describe("triangle hit testing", () => {
+  it("tests filled triangle interior against triangle edges", () => {
+    const element = API.createElement({
+      type: "triangle",
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      backgroundColor: "#ffffff",
+    });
+    const elementsMap = arrayToMap([element]);
+
+    expect(
+      hitElementItself({
+        point: pointFrom<GlobalPoint>(50, 75),
+        element,
+        threshold: 0,
+        elementsMap,
+      }),
+    ).toBe(true);
+
+    expect(
+      hitElementItself({
+        point: pointFrom<GlobalPoint>(10, 10),
+        element,
+        threshold: 0,
+        elementsMap,
+      }),
+    ).toBe(false);
+  });
+});
