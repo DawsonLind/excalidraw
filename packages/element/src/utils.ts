@@ -477,8 +477,7 @@ export function deconstructTriangleElement(
     return cachedShape;
   }
 
-  const [topX, topY, leftX, leftY, rightX, rightY] =
-    getTrianglePoints(element);
+  const [topX, topY, leftX, leftY, rightX, rightY] = getTrianglePoints(element);
   const vertices = [
     pointFrom<GlobalPoint>(element.x + topX, element.y + topY),
     pointFrom<GlobalPoint>(element.x + leftX, element.y + leftY),
