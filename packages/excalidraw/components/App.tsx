@@ -441,10 +441,7 @@ import ConvertElementTypePopup, {
   convertElementTypePopupAtom,
   convertElementTypes,
 } from "./ConvertElementTypePopup";
-import {
-  ConfettiOverlay,
-  confettiTriggerAtom,
-} from "./Confetti/Confetti";
+import { ConfettiOverlay, confettiTriggerAtom } from "./Confetti/Confetti";
 
 import { activeConfirmDialogAtom } from "./ActiveConfirmDialog";
 import BraveMeasureTextError from "./BraveMeasureTextError";

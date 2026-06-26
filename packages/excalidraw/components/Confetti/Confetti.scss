@@ -43,8 +43,7 @@
         calc(-50% + var(--confetti-x)),
         calc(-50% + var(--confetti-y))
       )
-      scale(1)
-      rotate(var(--confetti-rotate));
+      scale(1) rotate(var(--confetti-rotate));
   }
 }
 

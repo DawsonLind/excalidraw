@@ -1,6 +1,4 @@
-import { useEffect, useMemo } from "react";
-
-import type { CSSProperties } from "react";
+import { type CSSProperties, useEffect, useMemo } from "react";
 
 import { atom } from "../../editor-jotai";
 
@@ -49,7 +47,7 @@ export const ConfettiOverlay = ({
         duration: `${CONFETTI_DURATION + (index % 8) * 70}ms`,
         height: `${size * 1.6}px`,
         left: `${centerX}px`,
-        rotate: `${(index * 137) % 720 - 360}deg`,
+        rotate: `${((index * 137) % 720) - 360}deg`,
         top: `${centerY}px`,
         width: `${size}px`,
         x: `${Math.cos(angle) * distance + drift}px`,
