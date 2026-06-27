@@ -1,6 +1,7 @@
 import {
   curvePointDistance,
   distanceToLineSegment,
+  lineSegment,
   pointRotateRads,
 } from "@excalidraw/math";
 
@@ -15,12 +16,14 @@ import {
 } from "./utils";
 
 import { elementCenterPoint } from "./bounds";
+import { getElementShape } from "./shape";
 
 import type {
   ElementsMap,
   ExcalidrawDiamondElement,
   ExcalidrawElement,
   ExcalidrawEllipseElement,
+  ExcalidrawHeartElement,
   ExcalidrawFreeDrawElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
@@ -43,6 +46,8 @@ export const distanceToElement = (
       return distanceToRectanguloidElement(element, elementsMap, p);
     case "diamond":
       return distanceToDiamondElement(element, elementsMap, p);
+    case "heart":
+      return distanceToHeartElement(element, elementsMap, p);
     case "ellipse":
       return distanceToEllipseElement(element, elementsMap, p);
     case "line":
@@ -129,6 +134,27 @@ const distanceToEllipseElement = (
     pointRotateRads(p, center, -element.angle as Radians),
     ellipse(center, element.width / 2, element.height / 2),
   );
+};
+
+const distanceToHeartElement = (
+  element: ExcalidrawHeartElement,
+  elementsMap: ElementsMap,
+  p: GlobalPoint,
+): number => {
+  const shape = getElementShape(element, elementsMap);
+  if (shape.type !== "polygon") {
+    return Infinity;
+  }
+  const points = shape.data;
+  let minDistance = Infinity;
+  for (let i = 0; i < points.length; i++) {
+    const next = points[(i + 1) % points.length];
+    minDistance = Math.min(
+      minDistance,
+      distanceToLineSegment(p, lineSegment(points[i], next)),
+    );
+  }
+  return minDistance;
 };
 
 const distanceToLinearOrFreeDraElement = (

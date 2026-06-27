@@ -1,10 +1,11 @@
-import { simplify } from "points-on-curve";
+import { simplify, pointsOnBezierCurves } from "points-on-curve";
 import { getStroke } from "perfect-freehand";
 import { LaserPointer } from "@excalidraw/laser-pointer";
 
 import {
   type GeometricShape,
   getClosedCurveShape,
+  getCurvePathOps,
   getCurveShape,
   getEllipseShape,
   getFreedrawShape,
@@ -16,6 +17,7 @@ import {
   pointDistance,
   type LocalPoint,
   pointRotateRads,
+  polygonFromPoints,
 } from "@excalidraw/math";
 import {
   ROUGHNESS,
@@ -63,6 +65,7 @@ import {
   getArrowheadPoints,
   getDiamondPoints,
   getElementAbsoluteCoords,
+  getHeartPath,
 } from "./bounds";
 import { shouldTestInside } from "./collision";
 
@@ -72,6 +75,7 @@ import type {
   ExcalidrawSelectionElement,
   ExcalidrawLinearElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHeartElement,
   ElementsMap,
   ExcalidrawLineElement,
   Arrowhead,
@@ -230,7 +234,8 @@ export const generateRoughOptions = (
     case "iframe":
     case "embeddable":
     case "diamond":
-    case "ellipse": {
+    case "ellipse":
+    case "heart": {
       options.fillStyle = element.fillStyle;
       options.fill = isTransparent(element.backgroundColor)
         ? undefined
@@ -870,6 +875,13 @@ const _generateElementShape = (
       );
       return shape;
     }
+    case "heart": {
+      const shape: ElementShapes[typeof element.type] = generator.path(
+        getHeartPath(element.width, element.height),
+        generateRoughOptions(element, true, isDarkMode),
+      );
+      return shape;
+    }
     case "line":
     case "arrow": {
       let shape: ElementShapes[typeof element.type];
@@ -1064,6 +1076,54 @@ const generateElbowArrowShape = (
   return d.join(" ");
 };
 
+const getHeartGeometricShape = <Point extends GlobalPoint | LocalPoint>(
+  element: ExcalidrawHeartElement,
+  elementsMap: ElementsMap,
+): GeometricShape<Point> => {
+  const roughShape = ShapeCache.generateElementShape(element, null);
+  const [, , , , cx, cy] = getElementAbsoluteCoords(element, elementsMap);
+  const center = pointFrom<Point>(cx, cy);
+  const startingPoint = pointFrom<Point>(element.x, element.y);
+
+  const transform = (p: Point) =>
+    pointRotateRads(
+      pointFrom(p[0] + startingPoint[0], p[1] + startingPoint[1]),
+      center,
+      element.angle,
+    );
+
+  const ops = getCurvePathOps(roughShape);
+  const points: Point[] = [];
+  let odd = false;
+  for (const operation of ops) {
+    if (operation.op === "move") {
+      odd = !odd;
+      if (odd) {
+        points.push(pointFrom(operation.data[0], operation.data[1]));
+      }
+    } else if (operation.op === "bcurveTo") {
+      if (odd) {
+        points.push(pointFrom(operation.data[0], operation.data[1]));
+        points.push(pointFrom(operation.data[2], operation.data[3]));
+        points.push(pointFrom(operation.data[4], operation.data[5]));
+      }
+    } else if (operation.op === "lineTo") {
+      if (odd) {
+        points.push(pointFrom(operation.data[0], operation.data[1]));
+      }
+    }
+  }
+
+  const polygonPoints = pointsOnBezierCurves(points, 10, 5).map((p) =>
+    transform(p as Point),
+  ) as Point[];
+
+  return {
+    type: "polygon",
+    data: polygonFromPoints<Point>(polygonPoints),
+  };
+};
+
 /**
  * get the pure geometric shape of an excalidraw elementw
  * which is then used for hit detection
@@ -1106,6 +1166,9 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
 
     case "ellipse":
       return getEllipseShape(element);
+
+    case "heart":
+      return getHeartGeometricShape(element, elementsMap);
 
     case "freedraw": {
       const [, , , , cx, cy] = getElementAbsoluteCoords(element, elementsMap);
