@@ -534,6 +534,22 @@ export const getDiamondPoints = (element: ExcalidrawElement) => {
   return [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY];
 };
 
+/** SVG path for a heart shape within a width x height bounding box. */
+export const getHeartPath = (width: number, height: number) => {
+  const w = Math.max(width, 1);
+  const h = Math.max(height, 1);
+  const cx = w / 2;
+
+  return [
+    `M ${cx} ${h * 0.3}`,
+    `C ${cx} 0, 0 0, 0 ${h * 0.3}`,
+    `C 0 ${h * 0.55}, ${cx} ${h * 0.75}, ${cx} ${h}`,
+    `C ${cx} ${h * 0.75}, ${w} ${h * 0.55}, ${w} ${h * 0.3}`,
+    `C ${w} 0, ${cx} 0, ${cx} ${h * 0.3}`,
+    "Z",
+  ].join(" ");
+};
+
 // reference: https://eliot-jones.com/2019/12/cubic-bezier-curve-bounding-boxes
 const getBezierValueForT = (
   t: number,

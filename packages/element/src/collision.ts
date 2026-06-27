@@ -62,6 +62,7 @@ import { distanceToElement } from "./distance";
 import { getBindingGap } from "./binding";
 
 import { hasBackground } from "./comparisons";
+import { getElementShape } from "./shape";
 
 import type {
   ElementsMap,
@@ -70,6 +71,7 @@ import type {
   ExcalidrawDiamondElement,
   ExcalidrawElement,
   ExcalidrawEllipseElement,
+  ExcalidrawHeartElement,
   ExcalidrawFreeDrawElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
@@ -478,6 +480,13 @@ export const intersectElementWithLineSegment = (
         line,
         offset,
       );
+    case "heart":
+      return intersectHeartWithLineSegment(
+        element,
+        elementsMap,
+        line,
+        onlyFirst,
+      );
     case "line":
     case "freedraw":
     case "arrow":
@@ -703,6 +712,34 @@ const intersectDiamondWithLineSegment = (
     element.angle,
     onlyFirst,
   );
+
+  return intersections;
+};
+
+const intersectHeartWithLineSegment = (
+  element: ExcalidrawHeartElement,
+  elementsMap: ElementsMap,
+  l: LineSegment<GlobalPoint>,
+  onlyFirst = false,
+): GlobalPoint[] => {
+  const shape = getElementShape(element, elementsMap);
+  if (shape.type !== "polygon") {
+    return [];
+  }
+
+  const points = shape.data as GlobalPoint[];
+  const intersections: GlobalPoint[] = [];
+
+  for (let i = 0; i < points.length; i++) {
+    const side = lineSegment(points[i], points[(i + 1) % points.length]);
+    const intersection = lineSegmentIntersectionPoints(side, l);
+    if (intersection) {
+      intersections.push(intersection);
+      if (onlyFirst) {
+        return intersections;
+      }
+    }
+  }
 
   return intersections;
 };
