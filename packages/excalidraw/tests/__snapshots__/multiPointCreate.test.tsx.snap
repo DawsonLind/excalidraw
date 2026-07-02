@@ -18,6 +18,7 @@ exports[`multi point mode in linear elements > arrow 3`] = `
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -70,6 +71,7 @@ exports[`multi point mode in linear elements > line 3`] = `
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [

@@ -18,6 +18,7 @@ exports[`repairing bindings > should strip arrow binding if repair throws 1`] = 
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -65,6 +66,7 @@ exports[`restoreElements > should restore arrow element correctly 1`] = `
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -113,6 +115,7 @@ exports[`restoreElements > should restore correctly with rectangle, ellipse and 
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 10,
   "roughness": 2,
   "roundness": {
@@ -151,6 +154,7 @@ exports[`restoreElements > should restore correctly with rectangle, ellipse and 
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 10,
   "roughness": 2,
   "roundness": {
@@ -189,6 +193,7 @@ exports[`restoreElements > should restore correctly with rectangle, ellipse and 
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 10,
   "roughness": 2,
   "roundness": {
@@ -223,6 +228,7 @@ exports[`restoreElements > should restore freedraw element correctly 1`] = `
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -273,6 +279,7 @@ exports[`restoreElements > should restore line and draw elements correctly 1`] =
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -320,6 +327,7 @@ exports[`restoreElements > should restore line and draw elements correctly 2`] =
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -370,6 +378,7 @@ exports[`restoreElements > should restore text element correctly passing value f
   "lineHeight": "1.25000",
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "originalText": "text",
   "roughness": 1,
@@ -412,6 +421,7 @@ exports[`restoreElements > should restore text element correctly with unknown fo
   "lineHeight": "1.25000",
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "originalText": "",
   "roughness": 1,
