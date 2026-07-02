@@ -9,6 +9,7 @@ export {
   hasBackground,
   hasStrokeWidth,
   hasStrokeStyle,
+  hasNeonGlow,
   hasFreedrawMode,
   canHaveArrowheads,
   canChangeRoundness,

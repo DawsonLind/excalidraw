@@ -255,6 +255,7 @@ export const actionWrapTextInContainer = register({
             appState.currentItemStrokeWidthKey,
           ),
           strokeStyle: appState.currentItemStrokeStyle,
+          neonGlow: appState.currentItemNeonGlow,
           roundness:
             appState.currentItemRoundness === "round"
               ? {

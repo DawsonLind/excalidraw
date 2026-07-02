@@ -452,6 +452,7 @@ export const DEFAULT_ELEMENT_PROPS: {
   fillStyle: ExcalidrawElement["fillStyle"];
   strokeWidth: ExcalidrawElement["strokeWidth"];
   strokeStyle: ExcalidrawElement["strokeStyle"];
+  neonGlow: ExcalidrawElement["neonGlow"];
   roughness: ExcalidrawElement["roughness"];
   opacity: ExcalidrawElement["opacity"];
   locked: ExcalidrawElement["locked"];
@@ -461,6 +462,7 @@ export const DEFAULT_ELEMENT_PROPS: {
   fillStyle: "solid",
   strokeWidth: STROKE_WIDTH[DEFAULT_ELEMENT_STROKE_WIDTH_KEY],
   strokeStyle: "solid",
+  neonGlow: false,
   roughness: ROUGHNESS.artist,
   opacity: 100,
   locked: false,

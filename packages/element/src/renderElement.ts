@@ -24,6 +24,7 @@ import {
   invariant,
   applyDarkModeFilter,
   isSafari,
+  isTransparent,
 } from "@excalidraw/common";
 
 import type {
@@ -90,19 +91,54 @@ const isPendingImageElement = (
   !renderConfig.imageCache.has(element.fileId);
 
 const getCanvasPadding = (element: ExcalidrawElement) => {
+  let padding: number;
+
   switch (element.type) {
     case "freedraw":
-      return element.strokeWidth * 12;
+      padding = element.strokeWidth * 12;
+      break;
     case "text":
-      return element.fontSize / 2;
+      padding = element.fontSize / 2;
+      break;
     case "arrow":
       if (element.endArrowhead || element.endArrowhead) {
-        return 40;
+        padding = 40;
+        break;
       }
-      return 20;
+      padding = 20;
+      break;
     default:
-      return 20;
+      padding = 20;
   }
+
+  if (element.neonGlow && !isTransparent(element.strokeColor)) {
+    padding += Math.max(24, element.strokeWidth * 12);
+  }
+
+  return padding;
+};
+
+const drawWithNeonGlow = (
+  element: NonDeletedExcalidrawElement,
+  context: CanvasRenderingContext2D,
+  renderConfig: StaticCanvasRenderConfig,
+  draw: () => void,
+) => {
+  if (!element.neonGlow || isTransparent(element.strokeColor)) {
+    draw();
+    return;
+  }
+
+  context.save();
+  context.shadowBlur = Math.max(14, element.strokeWidth * 8);
+  context.shadowColor = applyDarkModeFilter(
+    element.strokeColor,
+    renderConfig.theme === THEME.DARK,
+  );
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 0;
+  draw();
+  context.restore();
 };
 
 export const getRenderOpacity = (
@@ -399,7 +435,9 @@ const drawElementOnCanvas = (
       context.lineJoin = "round";
       context.lineCap = "round";
 
-      rc.draw(ShapeCache.generateElementShape(element, renderConfig));
+      drawWithNeonGlow(element, context, renderConfig, () => {
+        rc.draw(ShapeCache.generateElementShape(element, renderConfig));
+      });
       break;
     }
     case "arrow":
@@ -407,32 +445,34 @@ const drawElementOnCanvas = (
       context.lineJoin = "round";
       context.lineCap = "round";
 
-      ShapeCache.generateElementShape(element, renderConfig).forEach(
-        (shape) => {
+      drawWithNeonGlow(element, context, renderConfig, () => {
+        ShapeCache.generateElementShape(element, renderConfig).forEach((shape) => {
           rc.draw(shape);
-        },
-      );
+        });
+      });
       break;
     }
     case "freedraw": {
       // Draw directly to canvas
-      context.save();
+      drawWithNeonGlow(element, context, renderConfig, () => {
+        context.save();
 
-      const shapes = ShapeCache.generateElementShape(element, renderConfig);
+        const shapes = ShapeCache.generateElementShape(element, renderConfig);
 
-      for (const shape of shapes) {
-        if (typeof shape === "string") {
-          context.fillStyle = applyDarkModeFilter(
-            element.strokeColor,
-            renderConfig.theme === THEME.DARK,
-          );
-          context.fill(new Path2D(shape));
-        } else {
-          rc.draw(shape);
+        for (const shape of shapes) {
+          if (typeof shape === "string") {
+            context.fillStyle = applyDarkModeFilter(
+              element.strokeColor,
+              renderConfig.theme === THEME.DARK,
+            );
+            context.fill(new Path2D(shape));
+          } else {
+            rc.draw(shape);
+          }
         }
-      }
 
-      context.restore();
+        context.restore();
+      });
       break;
     }
     case "image": {

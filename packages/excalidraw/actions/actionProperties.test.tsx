@@ -185,6 +185,35 @@ describe("element locking", () => {
       expect(freedraw.strokeWidth).toBe(FREEDRAW_STROKE_WIDTH.bold);
     });
 
+    it("should toggle neon glow on selected stroke elements", () => {
+      const rect = API.createElement({
+        type: "rectangle",
+        neonGlow: false,
+      });
+      API.setElements([rect]);
+      API.setSelectedElements([rect]);
+
+      const neonGlowButton = queryByTestId(document.body, "neonGlow");
+      expect(neonGlowButton).not.toBe(null);
+      expect(neonGlowButton).not.toHaveClass("ToolIcon--selected");
+
+      fireEvent.click(neonGlowButton!);
+
+      const selectedElement = API.getSelectedElement();
+      expect(selectedElement.neonGlow).toBe(true);
+      expect(API.getAppState().currentItemNeonGlow).toBe(true);
+    });
+
+    it("should create new elements with current neon glow setting", () => {
+      API.setAppState({ currentItemNeonGlow: true });
+
+      const rect = API.createElement({ type: "rectangle" });
+      const freedraw = API.createElement({ type: "freedraw" });
+
+      expect(rect.neonGlow).toBe(true);
+      expect(freedraw.neonGlow).toBe(true);
+    });
+
     it("should not highlight any stroke width button if no common style", () => {
       const rect1 = API.createElement({
         type: "rectangle",

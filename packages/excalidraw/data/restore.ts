@@ -437,6 +437,7 @@ const restoreElementWithProperties = <
     strokeColor: element.strokeColor || DEFAULT_ELEMENT_PROPS.strokeColor,
     backgroundColor:
       element.backgroundColor || DEFAULT_ELEMENT_PROPS.backgroundColor,
+    neonGlow: element.neonGlow ?? DEFAULT_ELEMENT_PROPS.neonGlow,
     width: element.width || 0,
     height: element.height || 0,
     seed: element.seed ?? 1,

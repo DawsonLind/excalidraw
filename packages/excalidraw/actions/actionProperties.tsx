@@ -55,7 +55,7 @@ import {
   isUsingAdaptiveRadius,
 } from "@excalidraw/element";
 
-import { hasStrokeColor } from "@excalidraw/element";
+import { hasNeonGlow, hasStrokeColor } from "@excalidraw/element";
 
 import {
   updateElbowArrowPoints,
@@ -818,6 +818,53 @@ export const actionChangeStrokeStyle = register<
       </div>
     </fieldset>
   ),
+});
+
+export const actionChangeNeonGlow = register<ExcalidrawElement["neonGlow"]>({
+  name: "changeNeonGlow",
+  label: "labels.neonGlow",
+  trackEvent: false,
+  perform: (elements, appState, value) => {
+    const neonGlow = !!value;
+
+    return {
+      elements: changeProperty(elements, appState, (el) =>
+        hasNeonGlow(el.type)
+          ? newElementWith(el, {
+              neonGlow,
+            })
+          : el,
+      ),
+      appState: { ...appState, currentItemNeonGlow: neonGlow },
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+    };
+  },
+  PanelComponent: ({ elements, appState, updateData, app }) => {
+    const neonGlow = getFormValue(
+      elements,
+      app,
+      (element) => element.neonGlow,
+      (element) => hasNeonGlow(element.type),
+      (hasSelection) => (hasSelection ? null : appState.currentItemNeonGlow),
+    );
+
+    return (
+      <fieldset>
+        <legend>{t("labels.neonGlow")}</legend>
+        <div className="buttonList">
+          <ToolButton
+            type="button"
+            label={t("labels.neonGlow")}
+            title={t("labels.neonGlow")}
+            aria-label={t("labels.neonGlow")}
+            data-testid="neonGlow"
+            selected={!!neonGlow}
+            onClick={() => updateData(!neonGlow)}
+          />
+        </div>
+      </fieldset>
+    );
+  },
 });
 
 export const actionChangeOpacity = register<ExcalidrawElement["opacity"]>({

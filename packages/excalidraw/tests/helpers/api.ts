@@ -283,6 +283,7 @@ export class API {
         : null,
       roughness: rest.roughness ?? appState.currentItemRoughness,
       opacity: rest.opacity ?? appState.currentItemOpacity,
+      neonGlow: rest.neonGlow ?? appState.currentItemNeonGlow,
       boundElements: rest.boundElements ?? null,
       locked: rest.locked ?? false,
     };
