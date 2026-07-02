@@ -452,7 +452,7 @@ export const DEFAULT_ELEMENT_PROPS: {
   fillStyle: ExcalidrawElement["fillStyle"];
   strokeWidth: ExcalidrawElement["strokeWidth"];
   strokeStyle: ExcalidrawElement["strokeStyle"];
-  neonGlow: ExcalidrawElement["neonGlow"];
+  neonGlow: boolean;
   roughness: ExcalidrawElement["roughness"];
   opacity: ExcalidrawElement["opacity"];
   locked: ExcalidrawElement["locked"];
