@@ -358,6 +358,16 @@ export const EllipseIcon = createIcon(
   tablerIconProps,
 );
 
+// custom: speech bubble
+export const SpeechBubbleIcon = createIcon(
+  <g strokeWidth="1.5">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M5 7 C5 5.343 6.343 4 8 4 L16 4 C17.657 4 19 5.343 19 7 L19 13 C19 14.657 17.657 16 16 16 L10 16 L6 20 L6 16 C4.343 16 3 14.657 3 13 L3 7 C3 5.343 4.343 4 6 4" />
+  </g>,
+
+  tablerIconProps,
+);
+
 // tabler-icons: arrow-narrow-right
 export const ArrowIcon = createIcon(
   <g strokeWidth="1.5">
