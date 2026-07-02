@@ -101,6 +101,7 @@ export const actionPasteStyles = register({
             strokeWidth: elementStylesToCopyFrom?.strokeWidth,
             strokeColor: elementStylesToCopyFrom?.strokeColor,
             strokeStyle: elementStylesToCopyFrom?.strokeStyle,
+            neonGlow: elementStylesToCopyFrom?.neonGlow,
             fillStyle: elementStylesToCopyFrom?.fillStyle,
             opacity: elementStylesToCopyFrom?.opacity,
             roughness: elementStylesToCopyFrom?.roughness,

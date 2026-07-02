@@ -42,6 +42,7 @@ import {
   getTargetElements,
   hasBackground,
   hasFreedrawMode,
+  hasNeonGlow,
   hasStrokeStyle,
   hasStrokeWidth,
 } from "../scene";
@@ -213,6 +214,10 @@ export const SelectedShapeActions = ({
           {renderAction("changeSloppiness")}
         </>
       )}
+
+      {(hasNeonGlow(appState.activeTool.type) ||
+        targetElements.some((element) => hasNeonGlow(element.type))) &&
+        renderAction("changeNeonGlow")}
 
       {(canChangeRoundness(appState.activeTool.type) ||
         targetElements.some((element) => canChangeRoundness(element.type))) && (
@@ -415,6 +420,9 @@ const CombinedShapeProperties = ({
                   {renderAction("changeSloppiness")}
                 </>
               )}
+              {(hasNeonGlow(appState.activeTool.type) ||
+                targetElements.some((element) => hasNeonGlow(element.type))) &&
+                renderAction("changeNeonGlow")}
               {(canChangeRoundness(appState.activeTool.type) ||
                 targetElements.some((element) =>
                   canChangeRoundness(element.type),

@@ -70,6 +70,7 @@ export type ActionName =
   | "changeSloppiness"
   | "changeFreedrawMode"
   | "changeStrokeStyle"
+  | "changeNeonGlow"
   | "changeArrowhead"
   | "changeArrowType"
   | "changeArrowProperties"

@@ -73,6 +73,7 @@ export type ElementConstructorOpts = MarkOptional<
   | "roundness"
   | "locked"
   | "opacity"
+  | "neonGlow"
   | "customData"
 >;
 
@@ -86,6 +87,7 @@ const _newElementBase = <T extends ExcalidrawElement>(
     fillStyle = DEFAULT_ELEMENT_PROPS.fillStyle,
     strokeWidth = DEFAULT_ELEMENT_PROPS.strokeWidth,
     strokeStyle = DEFAULT_ELEMENT_PROPS.strokeStyle,
+    neonGlow = DEFAULT_ELEMENT_PROPS.neonGlow,
     roughness = DEFAULT_ELEMENT_PROPS.roughness,
     opacity = DEFAULT_ELEMENT_PROPS.opacity,
     width = 0,
@@ -137,6 +139,7 @@ const _newElementBase = <T extends ExcalidrawElement>(
     fillStyle,
     strokeWidth,
     strokeStyle,
+    neonGlow,
     roughness,
     opacity,
     groupIds,

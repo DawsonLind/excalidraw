@@ -20,6 +20,7 @@ exports[`Test dragCreate > add element to the scene when pointer dragging long e
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -68,6 +69,7 @@ exports[`Test dragCreate > add element to the scene when pointer dragging long e
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "roughness": 1,
   "roundness": null,
@@ -102,6 +104,7 @@ exports[`Test dragCreate > add element to the scene when pointer dragging long e
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "roughness": 1,
   "roundness": null,
@@ -136,6 +139,7 @@ exports[`Test dragCreate > add element to the scene when pointer dragging long e
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "points": [
     [
@@ -183,6 +187,7 @@ exports[`Test dragCreate > add element to the scene when pointer dragging long e
   "isDeleted": false,
   "link": null,
   "locked": false,
+  "neonGlow": false,
   "opacity": 100,
   "roughness": 1,
   "roundness": null,
