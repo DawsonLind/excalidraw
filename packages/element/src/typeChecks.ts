@@ -184,6 +184,7 @@ export const isBindableElement = (
     (element.type === "rectangle" ||
       element.type === "diamond" ||
       element.type === "ellipse" ||
+      element.type === "callout" ||
       element.type === "image" ||
       element.type === "iframe" ||
       element.type === "embeddable" ||
@@ -200,6 +201,7 @@ export const isRectanguloidElement = (
     element != null &&
     (element.type === "rectangle" ||
       element.type === "diamond" ||
+      element.type === "callout" ||
       element.type === "image" ||
       element.type === "iframe" ||
       element.type === "embeddable" ||
@@ -237,6 +239,7 @@ export const isTextBindableContainer = (
     (element.type === "rectangle" ||
       element.type === "diamond" ||
       element.type === "ellipse" ||
+      element.type === "callout" ||
       isArrowElement(element))
   );
 };
@@ -252,6 +255,7 @@ export const isExcalidrawElement = (
     case "text":
     case "diamond":
     case "rectangle":
+    case "callout":
     case "iframe":
     case "embeddable":
     case "ellipse":
@@ -277,6 +281,7 @@ export const isFlowchartNodeElement = (
   return (
     element.type === "rectangle" ||
     element.type === "ellipse" ||
+    element.type === "callout" ||
     element.type === "diamond"
   );
 };
@@ -307,6 +312,7 @@ export const isArrowBoundToElement = (element: ExcalidrawArrowElement) => {
 
 export const isUsingAdaptiveRadius = (type: string) =>
   type === "rectangle" ||
+  type === "callout" ||
   type === "embeddable" ||
   type === "iframe" ||
   type === "image";
@@ -398,6 +404,7 @@ export const isEligibleFrameChildType = (type: ElementOrToolType) => {
     case "rectangle":
     case "diamond":
     case "ellipse":
+    case "callout":
     case "arrow":
     case "line":
     case "freedraw":

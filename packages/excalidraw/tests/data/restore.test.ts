@@ -626,15 +626,20 @@ describe("restoreElements", () => {
     expect(restoredLine_1.y).toBe(lineElement_1.y + offsetY);
   });
 
-  it("should restore correctly with rectangle, ellipse and diamond elements", () => {
-    const types = ["rectangle", "ellipse", "diamond"];
+  it("should restore correctly with rectangle, ellipse, diamond and callout elements", () => {
+    const types = ["rectangle", "ellipse", "diamond", "callout"];
 
     const elements: ExcalidrawElement[] = [];
     let idCount = 0;
     types.forEach((elType) => {
       idCount += 1;
       const element = API.createElement({
-        type: elType as "rectangle" | "ellipse" | "diamond" | "embeddable",
+        type: elType as
+          | "rectangle"
+          | "ellipse"
+          | "diamond"
+          | "callout"
+          | "embeddable",
         id: idCount.toString(),
         fillStyle: "cross-hatch",
         strokeWidth: 2,
