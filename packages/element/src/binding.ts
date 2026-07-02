@@ -59,6 +59,7 @@ import { aabbForElement, elementCenterPoint } from "./bounds";
 import { updateElbowArrowPoints } from "./elbowArrow";
 import {
   deconstructDiamondElement,
+  deconstructHexagonElement,
   deconstructRectanguloidElement,
   projectFixedPointOntoDiagonal,
 } from "./utils";
@@ -1665,7 +1666,7 @@ export const snapToMid = (
       center,
       angle,
     );
-  } else if (bindTarget.type === "diamond") {
+  } else if (bindTarget.type === "diamond" || bindTarget.type === "hexagon") {
     const distance = bindingGap;
     const topLeft = pointFrom<GlobalPoint>(
       x + width / 4 - distance,
@@ -2524,9 +2525,13 @@ type Side =
   | "bottom-left"
   | "left"
   | "top-left";
-type ShapeType = "rectangle" | "ellipse" | "diamond";
+type ShapeType = "rectangle" | "ellipse" | "diamond" | "hexagon";
 const getShapeType = (element: ExcalidrawBindableElement): ShapeType => {
-  if (element.type === "ellipse" || element.type === "diamond") {
+  if (
+    element.type === "ellipse" ||
+    element.type === "diamond" ||
+    element.type === "hexagon"
+  ) {
     return element.type;
   }
   return "rectangle";
@@ -2576,6 +2581,18 @@ const SHAPE_CONFIGS: Record<ShapeType, SectorConfig[]> = {
     { centerAngle: 225, sectorWidth: 75, side: "top-left" },
     { centerAngle: 270, sectorWidth: 15, side: "top" },
     { centerAngle: 315, sectorWidth: 75, side: "top-right" },
+  ],
+
+  // hexagon: flat-top with side vertices at left/right
+  hexagon: [
+    { centerAngle: 0, sectorWidth: 15, side: "right" },
+    { centerAngle: 45, sectorWidth: 30, side: "bottom-right" },
+    { centerAngle: 90, sectorWidth: 15, side: "bottom" },
+    { centerAngle: 135, sectorWidth: 30, side: "bottom-left" },
+    { centerAngle: 180, sectorWidth: 15, side: "left" },
+    { centerAngle: 225, sectorWidth: 30, side: "top-left" },
+    { centerAngle: 270, sectorWidth: 15, side: "top" },
+    { centerAngle: 315, sectorWidth: 30, side: "top-right" },
   ],
 };
 
@@ -2743,6 +2760,83 @@ export const getBindingSideMidPoint = (
       case "bottom-right": {
         const midPoint = getMidPoint(bottomRight[0], bottomRight[1]);
 
+        x = midPoint[0] + OFFSET * 0.707;
+        y = midPoint[1] + OFFSET * 0.707;
+        break;
+      }
+      case "bottom-left": {
+        const midPoint = getMidPoint(bottomLeft[0], bottomLeft[1]);
+        x = midPoint[0] - OFFSET * 0.707;
+        y = midPoint[1] + OFFSET * 0.707;
+        break;
+      }
+      case "top-left": {
+        const midPoint = getMidPoint(topLeft[0], topLeft[1]);
+        x = midPoint[0] - OFFSET * 0.707;
+        y = midPoint[1] - OFFSET * 0.707;
+        break;
+      }
+      default: {
+        return null;
+      }
+    }
+
+    return pointRotateRads(pointFrom(x, y), center, bindableElement.angle);
+  }
+
+  if (bindableElement.type === "hexagon") {
+    const [sides, corners] = deconstructHexagonElement(bindableElement);
+    const [top, topRight, right, bottomRight, bottomLeft, topLeft] = sides;
+
+    let x: number;
+    let y: number;
+    switch (side) {
+      case "left": {
+        if (corners.length >= 6) {
+          const leftCorner = corners[5];
+          const midPoint = leftCorner[1];
+          x = midPoint[0] - OFFSET;
+          y = midPoint[1];
+        } else {
+          const midPoint = getMidPoint(topLeft[1], bottomLeft[0]);
+          x = midPoint[0] - OFFSET;
+          y = midPoint[1];
+        }
+        break;
+      }
+      case "right": {
+        if (corners.length >= 3) {
+          const rightCorner = corners[2];
+          const midPoint = rightCorner[1];
+          x = midPoint[0] + OFFSET;
+          y = midPoint[1];
+        } else {
+          const midPoint = getMidPoint(topRight[1], bottomRight[0]);
+          x = midPoint[0] + OFFSET;
+          y = midPoint[1];
+        }
+        break;
+      }
+      case "top": {
+        const midPoint = getMidPoint(top[0], top[1]);
+        x = midPoint[0];
+        y = midPoint[1] - OFFSET;
+        break;
+      }
+      case "bottom": {
+        const midPoint = getMidPoint(bottomRight[1], bottomLeft[0]);
+        x = midPoint[0];
+        y = midPoint[1] + OFFSET;
+        break;
+      }
+      case "top-right": {
+        const midPoint = getMidPoint(topRight[0], topRight[1]);
+        x = midPoint[0] + OFFSET * 0.707;
+        y = midPoint[1] - OFFSET * 0.707;
+        break;
+      }
+      case "bottom-right": {
+        const midPoint = getMidPoint(bottomRight[0], bottomRight[1]);
         x = midPoint[0] + OFFSET * 0.707;
         y = midPoint[1] + OFFSET * 0.707;
         break;

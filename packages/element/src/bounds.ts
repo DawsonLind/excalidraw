@@ -45,6 +45,7 @@ import {
 import { getElementShape } from "./shape";
 import {
   deconstructDiamondElement,
+  deconstructHexagonElement,
   deconstructRectanguloidElement,
 } from "./utils";
 import { intersectElementWithLineSegment } from "./collision";
@@ -200,6 +201,17 @@ export class ElementBounds {
       const maxX = Math.max(x11, x12, x22, x21);
       const maxY = Math.max(y11, y12, y22, y21);
       bounds = [minX, minY, maxX, maxY];
+    } else if (element.type === "hexagon") {
+      const vertices = getHexagonVertices(element).map(([vx, vy]) =>
+        pointRotateRads(
+          pointFrom(x1 + vx, y1 + vy),
+          pointFrom(cx, cy),
+          element.angle,
+        ),
+      );
+      const xs = vertices.map(([vx]) => vx);
+      const ys = vertices.map(([, vy]) => vy);
+      bounds = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
     } else if (element.type === "ellipse") {
       const w = (x2 - x1) / 2;
       const h = (y2 - y1) / 2;
@@ -360,6 +372,14 @@ export const getElementLineSegments = (
     return [...rotatedSides, ...cornerSegments];
   } else if (element.type === "diamond") {
     const [sides, corners] = deconstructDiamondElement(element);
+    const cornerSegments = corners
+      .map((corner) => getSegmentsOnCurve(corner, center, element.angle))
+      .flat();
+    const rotatedSides = getRotatedSides(sides, center, element.angle);
+
+    return [...rotatedSides, ...cornerSegments];
+  } else if (element.type === "hexagon") {
+    const [sides, corners] = deconstructHexagonElement(element);
     const cornerSegments = corners
       .map((corner) => getSegmentsOnCurve(corner, center, element.angle))
       .flat();
@@ -532,6 +552,44 @@ export const getDiamondPoints = (element: ExcalidrawElement) => {
   const leftY = rightY;
 
   return [topX, topY, rightX, rightY, bottomX, bottomY, leftX, leftY];
+};
+
+export const getHexagonPoints = (element: ExcalidrawElement) => {
+  const quarterX = Math.max(1, Math.floor(element.width / 4));
+  const threeQuarterX = Math.max(
+    quarterX + 1,
+    Math.floor((3 * element.width) / 4),
+  );
+  const midY = Math.floor(element.height / 2) + 1;
+  const w = element.width;
+  const h = element.height;
+
+  // flat-top hexagon: top-left, top-right, right, bottom-right, bottom-left, left
+  const x0 = quarterX;
+  const y0 = 0;
+  const x1 = threeQuarterX;
+  const y1 = 0;
+  const x2 = w;
+  const y2 = midY;
+  const x3 = threeQuarterX;
+  const y3 = h;
+  const x4 = quarterX;
+  const y4 = h;
+  const x5 = 0;
+  const y5 = midY;
+
+  return [x0, y0, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5];
+};
+
+export const getHexagonVertices = (
+  element: ExcalidrawElement,
+): [number, number][] => {
+  const points = getHexagonPoints(element);
+  const vertices: [number, number][] = [];
+  for (let i = 0; i < points.length; i += 2) {
+    vertices.push([points[i], points[i + 1]]);
+  }
+  return vertices;
 };
 
 // reference: https://eliot-jones.com/2019/12/cubic-bezier-curve-bounding-boxes

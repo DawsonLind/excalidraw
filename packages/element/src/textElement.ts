@@ -437,6 +437,7 @@ const VALID_CONTAINER_TYPES = new Set([
   "rectangle",
   "ellipse",
   "diamond",
+  "hexagon",
   "arrow",
 ]);
 
@@ -459,6 +460,9 @@ export const computeContainerDimensionForBoundText = (
     return dimension + padding * 8;
   }
   if (containerType === "diamond") {
+    return 2 * (dimension + padding);
+  }
+  if (containerType === "hexagon") {
     return 2 * (dimension + padding);
   }
   return dimension + padding;
@@ -486,6 +490,9 @@ export const getBoundTextMaxWidth = (
     // Math.round(width / 2) - https://github.com/excalidraw/excalidraw/pull/6265
     return Math.round(width / 2) - BOUND_TEXT_PADDING * 2;
   }
+  if (container.type === "hexagon") {
+    return Math.round(width / 2) - BOUND_TEXT_PADDING * 2;
+  }
   return width - BOUND_TEXT_PADDING * 2;
 };
 
@@ -511,6 +518,9 @@ export const getBoundTextMaxHeight = (
     // The height of the largest rectangle inscribed inside a rhombus is
     // Math.round(height / 2) - https://github.com/excalidraw/excalidraw/pull/6265
     return Math.round(height / 2) - BOUND_TEXT_PADDING * 2;
+  }
+  if (container.type === "hexagon") {
+    return Math.round((height * 3) / 4) - BOUND_TEXT_PADDING * 2;
   }
   return height - BOUND_TEXT_PADDING * 2;
 };

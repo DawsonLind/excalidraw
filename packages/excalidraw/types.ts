@@ -148,6 +148,7 @@ export type ToolType =
   | "rectangle"
   | "diamond"
   | "ellipse"
+  | "hexagon"
   | "arrow"
   | "line"
   | "freedraw"

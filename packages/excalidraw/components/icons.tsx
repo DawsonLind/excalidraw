@@ -348,6 +348,16 @@ export const DiamondIcon = createIcon(
   tablerIconProps,
 );
 
+// tabler-icons: hexagon
+export const HexagonIcon = createIcon(
+  <g strokeWidth="1.5">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M19 6.8l-7 -4.4a1 1 0 0 0 -1 0l-7 4.4a1 1 0 0 0 -.5 .9v8.7a1 1 0 0 0 .5 .9l7 4.4a1 1 0 0 0 1 0l7 -4.4a1 1 0 0 0 .5 -.9v-8.7a1 1 0 0 0 -.5 -.9" />
+  </g>,
+
+  tablerIconProps,
+);
+
 // tabler-icons: circle
 export const EllipseIcon = createIcon(
   <g strokeWidth="1.5">

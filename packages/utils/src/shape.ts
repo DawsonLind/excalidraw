@@ -45,6 +45,7 @@ import type {
   ExcalidrawEmbeddableElement,
   ExcalidrawFrameLikeElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHexagonElement,
   ExcalidrawIframeElement,
   ExcalidrawImageElement,
   ExcalidrawLinearElement,
@@ -105,6 +106,7 @@ export type GeometricShape<Point extends GlobalPoint | LocalPoint> =
 type RectangularElement =
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
+  | ExcalidrawHexagonElement
   | ExcalidrawFrameLikeElement
   | ExcalidrawEmbeddableElement
   | ExcalidrawImageElement
@@ -131,6 +133,18 @@ export const getPolygonShape = <Point extends GlobalPoint | LocalPoint>(
       pointRotateRads(pointFrom(x + width, cy), center, angle),
       pointRotateRads(pointFrom(cx, y + height), center, angle),
       pointRotateRads(pointFrom(x, cy), center, angle),
+    );
+  } else if (element.type === "hexagon") {
+    const quarterX = width / 4;
+    const threeQuarterX = (3 * width) / 4;
+    const midY = height / 2;
+    data = polygon(
+      pointRotateRads(pointFrom(x + quarterX, y), center, angle),
+      pointRotateRads(pointFrom(x + threeQuarterX, y), center, angle),
+      pointRotateRads(pointFrom(x + width, y + midY), center, angle),
+      pointRotateRads(pointFrom(x + threeQuarterX, y + height), center, angle),
+      pointRotateRads(pointFrom(x + quarterX, y + height), center, angle),
+      pointRotateRads(pointFrom(x, y + midY), center, angle),
     );
   } else {
     data = polygon(

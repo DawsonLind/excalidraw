@@ -35,6 +35,7 @@ import {
   getCubicBezierCurveBound,
   getDiamondPoints,
   getElementBounds,
+  getHexagonVertices,
   pointInsideBounds,
 } from "./bounds";
 import {
@@ -49,6 +50,7 @@ import {
 } from "./typeChecks";
 import {
   deconstructDiamondElement,
+  deconstructHexagonElement,
   deconstructLinearOrFreeDrawElement,
   deconstructRectanguloidElement,
 } from "./utils";
@@ -71,6 +73,7 @@ import type {
   ExcalidrawElement,
   ExcalidrawEllipseElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHexagonElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
   NonDeleted,
@@ -471,6 +474,14 @@ export const intersectElementWithLineSegment = (
         offset,
         onlyFirst,
       );
+    case "hexagon":
+      return intersectHexagonWithLineSegment(
+        element,
+        elementsMap,
+        line,
+        offset,
+        onlyFirst,
+      );
     case "ellipse":
       return intersectEllipseWithLineSegment(
         element,
@@ -707,6 +718,47 @@ const intersectDiamondWithLineSegment = (
   return intersections;
 };
 
+const intersectHexagonWithLineSegment = (
+  element: ExcalidrawHexagonElement,
+  elementsMap: ElementsMap,
+  l: LineSegment<GlobalPoint>,
+  offset: number = 0,
+  onlyFirst = false,
+): GlobalPoint[] => {
+  const center = elementCenterPoint(element, elementsMap);
+
+  const rotatedA = pointRotateRads(l[0], center, -element.angle as Radians);
+  const rotatedB = pointRotateRads(l[1], center, -element.angle as Radians);
+  const rotatedIntersector = lineSegment(rotatedA, rotatedB);
+
+  const [sides, corners] = deconstructHexagonElement(element, offset);
+  const intersections: GlobalPoint[] = [];
+
+  lineIntersections(
+    sides,
+    rotatedIntersector,
+    intersections,
+    center,
+    element.angle,
+    onlyFirst,
+  );
+
+  if (onlyFirst && intersections.length > 0) {
+    return intersections;
+  }
+
+  curveIntersections(
+    corners,
+    rotatedIntersector,
+    intersections,
+    center,
+    element.angle,
+    onlyFirst,
+  );
+
+  return intersections;
+};
+
 /**
  *
  * @param element
@@ -813,6 +865,21 @@ export const isBindableElementInsideOtherBindable = (
         pointFrom(x + bottomX, y + bottomY + offset), // bottom
         pointFrom(x + leftX - offset, y + leftY), // left
       ];
+      return corners.map((corner) => pointRotateRads(corner, center, angle));
+    }
+    if (element.type === "hexagon") {
+      const vertices = getHexagonVertices(element);
+      const corners: GlobalPoint[] = vertices.map(([vx, vy], index) => {
+        const [pvx, pvy] = vertices[(index - 1 + vertices.length) % vertices.length];
+        const [nvx, nvy] = vertices[(index + 1) % vertices.length];
+        const dx = (nvx - pvx) / 2;
+        const dy = (nvy - pvy) / 2;
+        const len = Math.hypot(dx, dy) || 1;
+        return pointFrom(
+          x + vx + (dx / len) * offset,
+          y + vy + (dy / len) * offset,
+        );
+      });
       return corners.map((corner) => pointRotateRads(corner, center, angle));
     }
     if (element.type === "ellipse") {
