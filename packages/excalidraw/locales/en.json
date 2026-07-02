@@ -38,6 +38,7 @@
     "pressure": "Pressure",
     "pressure_constant": "Constant",
     "pressure_variable": "Variable",
+    "pressure_rainbow": "Rainbow",
     "opacity": "Opacity",
     "textAlign": "Text align",
     "edges": "Edges",

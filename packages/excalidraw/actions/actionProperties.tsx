@@ -137,6 +137,7 @@ import {
   ArrowheadCardinalityZeroOrManyIcon,
   ArrowheadCardinalityZeroOrOneIcon,
   strokeVariabilityConstantIcon,
+  strokeVariabilityRainbowIcon,
   strokeVariabilityVariableIcon,
 } from "../components/icons";
 
@@ -720,20 +721,25 @@ export const actionChangeFreedrawMode = register<StrokeVariability>({
       ) ?? appState.currentItemStrokeVariability;
 
     // in the compact UI the pressure setting is rendered as a single button
-    // that cycles between the two variability modes on click
+    // that cycles between the available freedraw modes on click
     if (data?.cycle) {
-      const isVariable = strokeVariability === "variable";
+      const modes: StrokeVariability[] = ["constant", "variable", "rainbow"];
+      const nextMode =
+        modes[(modes.indexOf(strokeVariability) + 1) % modes.length];
+      const modeIcon =
+        strokeVariability === "rainbow"
+          ? strokeVariabilityRainbowIcon
+          : strokeVariability === "variable"
+          ? strokeVariabilityVariableIcon
+          : strokeVariabilityConstantIcon;
+
       return (
         <ToolButton
           type="button"
-          icon={
-            isVariable
-              ? strokeVariabilityVariableIcon
-              : strokeVariabilityConstantIcon
-          }
+          icon={modeIcon}
           title={t("labels.pressure")}
           aria-label={t("labels.pressure")}
-          onClick={() => updateData(isVariable ? "constant" : "variable")}
+          onClick={() => updateData(nextMode)}
         />
       );
     }
@@ -754,6 +760,11 @@ export const actionChangeFreedrawMode = register<StrokeVariability>({
                 value: "variable",
                 text: t("labels.pressure_variable"),
                 icon: strokeVariabilityVariableIcon,
+              },
+              {
+                value: "rainbow",
+                text: t("labels.pressure_rainbow"),
+                icon: strokeVariabilityRainbowIcon,
               },
             ]}
             value={strokeVariability}

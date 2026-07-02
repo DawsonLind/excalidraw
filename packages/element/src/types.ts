@@ -384,7 +384,7 @@ export type ExcalidrawElbowArrowElement = Merge<
   }
 >;
 
-export type StrokeVariability = "variable" | "constant";
+export type StrokeVariability = "variable" | "constant" | "rainbow";
 
 export type StrokeOptions = Readonly<{
   variability: StrokeVariability;

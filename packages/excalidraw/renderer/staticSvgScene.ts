@@ -33,11 +33,18 @@ import { getContainingFrame } from "@excalidraw/element";
 import { getCornerRadius, isPathALoop } from "@excalidraw/element";
 
 import { ShapeCache } from "@excalidraw/element";
+import {
+  getRainbowFreedrawColor,
+  getRainbowFreedrawSegments,
+  getRainbowFreedrawStrokeWidth,
+  isRainbowFreedrawElement,
+} from "@excalidraw/element";
 
 import { getElementAbsoluteCoords } from "@excalidraw/element";
 
 import type {
   ExcalidrawElement,
+  ExcalidrawFreeDrawElement,
   ExcalidrawTextElementWithContainer,
   NonDeletedExcalidrawElement,
 } from "@excalidraw/element/types";
@@ -82,6 +89,55 @@ const maybeWrapNodesInFrameClipPath = (
   }
 
   return null;
+};
+
+const appendRainbowFreedrawStrokeToSvg = (
+  element: ExcalidrawFreeDrawElement,
+  wrapper: SVGElement,
+  outlinePath: string,
+  svgRoot: SVGElement,
+) => {
+  const document = svgRoot.ownerDocument;
+  const segments = getRainbowFreedrawSegments(element);
+
+  if (!segments.length) {
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("fill", getRainbowFreedrawColor());
+    path.setAttribute("d", outlinePath);
+    wrapper.appendChild(path);
+    return;
+  }
+
+  const clipPath = document.createElementNS(SVG_NS, "clipPath");
+  clipPath.id = `freedraw-rainbow-clip-${element.id}`;
+  clipPath.setAttribute("clipPathUnits", "userSpaceOnUse");
+
+  const clipPathShape = document.createElementNS(SVG_NS, "path");
+  clipPathShape.setAttribute("d", outlinePath);
+  clipPath.appendChild(clipPathShape);
+
+  const clippedGroup = document.createElementNS(SVG_NS, "g");
+  clippedGroup.setAttribute("clip-path", `url(#${clipPath.id})`);
+  clippedGroup.setAttribute("fill", "none");
+  clippedGroup.setAttribute("stroke-linecap", "round");
+  clippedGroup.setAttribute("stroke-linejoin", "round");
+  clippedGroup.setAttribute(
+    "stroke-width",
+    `${getRainbowFreedrawStrokeWidth(element)}`,
+  );
+
+  for (const segment of segments) {
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", `${segment.start[0]}`);
+    line.setAttribute("y1", `${segment.start[1]}`);
+    line.setAttribute("x2", `${segment.end[0]}`);
+    line.setAttribute("y2", `${segment.end[1]}`);
+    line.setAttribute("stroke", segment.startColor);
+    clippedGroup.appendChild(line);
+  }
+
+  wrapper.appendChild(clipPath);
+  wrapper.appendChild(clippedGroup);
 };
 
 const renderElementToSvg = (
@@ -391,16 +447,20 @@ const renderElementToSvg = (
         if (typeof shape === "string") {
           // stroke (SVGPathString)
 
-          const path = svgRoot.ownerDocument.createElementNS(SVG_NS, "path");
-          path.setAttribute(
-            "fill",
-            applyDarkModeFilter(
-              element.strokeColor,
-              renderConfig.theme === THEME.DARK,
-            ),
-          );
-          path.setAttribute("d", shape);
-          wrapper.appendChild(path);
+          if (isRainbowFreedrawElement(element)) {
+            appendRainbowFreedrawStrokeToSvg(element, wrapper, shape, svgRoot);
+          } else {
+            const path = svgRoot.ownerDocument.createElementNS(SVG_NS, "path");
+            path.setAttribute(
+              "fill",
+              applyDarkModeFilter(
+                element.strokeColor,
+                renderConfig.theme === THEME.DARK,
+              ),
+            );
+            path.setAttribute("d", shape);
+            wrapper.appendChild(path);
+          }
         } else {
           // background (Drawable)
 

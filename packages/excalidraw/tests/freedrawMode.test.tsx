@@ -45,6 +45,15 @@ describe("freedraw mode action", () => {
     ).toBe(0.5);
     expect(h.state.currentItemStrokeVariability).toBe("variable");
 
+    fireEvent.click(screen.getByTitle("Rainbow"));
+    expect(
+      (h.elements[0] as ExcalidrawFreeDrawElement).strokeOptions?.variability,
+    ).toBe("rainbow");
+    expect(
+      (h.elements[0] as ExcalidrawFreeDrawElement).strokeOptions?.streamline,
+    ).toBe(0.5);
+    expect(h.state.currentItemStrokeVariability).toBe("rainbow");
+
     fireEvent.click(screen.getByTitle("Constant"));
     expect(
       (h.elements[0] as ExcalidrawFreeDrawElement).strokeOptions?.variability,

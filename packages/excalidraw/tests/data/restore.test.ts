@@ -200,7 +200,7 @@ describe("restoreElements", () => {
       points: [pointFrom(0, 0), pointFrom(10, 10)],
     });
 
-    const [missing, bogusString, bogusNumber, valid, variable] =
+    const [missing, bogusString, bogusNumber, valid, variable, rainbow] =
       restore.restoreElements(
         [
           { ...freedrawElement, id: "missing", strokeOptions: undefined },
@@ -224,6 +224,11 @@ describe("restoreElements", () => {
             id: "variable",
             strokeOptions: { variability: "variable", streamline: 0.8 },
           },
+          {
+            ...freedrawElement,
+            id: "rainbow",
+            strokeOptions: { variability: "rainbow", streamline: 0.8 },
+          },
         ] as any,
         null,
       ) as ExcalidrawFreeDrawElement[];
@@ -233,11 +238,13 @@ describe("restoreElements", () => {
     expect(bogusNumber.strokeOptions?.variability).toBe("variable");
     expect(valid.strokeOptions?.variability).toBe("constant");
     expect(variable.strokeOptions?.variability).toBe("variable");
+    expect(rainbow.strokeOptions?.variability).toBe("rainbow");
     expect(missing.strokeOptions?.streamline).toBe(0.5);
     expect(bogusString.strokeOptions?.streamline).toBe(0.5);
     expect(bogusNumber.strokeOptions?.streamline).toBe(0.5);
     expect(valid.strokeOptions?.streamline).toBe(0.8);
     expect(variable.strokeOptions?.streamline).toBe(0.8);
+    expect(rainbow.strokeOptions?.streamline).toBe(0.8);
   });
 
   it("should restore line and draw elements correctly", () => {
@@ -747,6 +754,12 @@ describe("restoreAppState", () => {
         null,
       ).currentItemStrokeVariability,
     ).toBe("variable");
+    expect(
+      restore.restoreAppState(
+        { currentItemStrokeVariability: "rainbow" } as any,
+        null,
+      ).currentItemStrokeVariability,
+    ).toBe("rainbow");
   });
 
   it("when appState is null it should return the local app state property", () => {

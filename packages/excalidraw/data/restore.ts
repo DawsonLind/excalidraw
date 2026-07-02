@@ -227,6 +227,7 @@ export type RestoredDataState = {
 const ALLOWED_STROKE_VARIABILITIES = new Set<StrokeVariability>([
   "constant",
   "variable",
+  "rainbow",
 ]);
 
 const restoreStrokeVariability = (

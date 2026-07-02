@@ -1173,6 +1173,13 @@ const getFreeDrawSvgPath = (element: ExcalidrawFreeDrawElement) => {
   ) as SVGPathString;
 };
 
+export type RainbowFreedrawSegment = Readonly<{
+  start: LocalPoint;
+  end: LocalPoint;
+  startColor: string;
+  endColor: string;
+}>;
+
 /**
  * Freedraw stroke geometry tuning constants.
  *
@@ -1191,6 +1198,53 @@ const CONSTANT_WIDTH_FREEDRAW = {
   /** Stroke size relative to `strokeWidth` for uniform (laser) strokes. */
   SIZE_FACTOR: 1.4,
 } as const;
+
+const RAINBOW_FREEDRAW = {
+  /** Scene units per complete hue rotation along the stroke path. */
+  HUE_CYCLE_LENGTH: 240,
+} as const;
+
+export const isRainbowFreedrawElement = (
+  element: ExcalidrawFreeDrawElement,
+) => element.strokeOptions?.variability === "rainbow";
+
+export const getRainbowFreedrawStrokeWidth = (
+  element: ExcalidrawFreeDrawElement,
+) => element.strokeWidth * VARIABLE_WIDTH_FREEDRAW.SIZE_FACTOR;
+
+export const getRainbowFreedrawColor = (distanceAlongPath = 0) => {
+  const hue =
+    ((distanceAlongPath / RAINBOW_FREEDRAW.HUE_CYCLE_LENGTH) * 360) % 360;
+  return `hsl(${hue.toFixed(1)}, 100%, 50%)`;
+};
+
+export const getRainbowFreedrawSegments = (
+  element: ExcalidrawFreeDrawElement,
+): RainbowFreedrawSegment[] => {
+  const segments: RainbowFreedrawSegment[] = [];
+  let pathLength = 0;
+
+  for (let index = 1; index < element.points.length; index++) {
+    const start = element.points[index - 1];
+    const end = element.points[index];
+    const segmentLength = pointDistance(start, end);
+
+    if (segmentLength === 0) {
+      continue;
+    }
+
+    segments.push({
+      start,
+      end,
+      startColor: getRainbowFreedrawColor(pathLength),
+      endColor: getRainbowFreedrawColor(pathLength + segmentLength),
+    });
+
+    pathLength += segmentLength;
+  }
+
+  return segments;
+};
 
 const getFreedrawStreamline = (element: ExcalidrawFreeDrawElement) =>
   element.strokeOptions?.streamline ?? DEFAULT_STROKE_STREAMLINE;

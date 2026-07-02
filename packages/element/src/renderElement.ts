@@ -66,7 +66,13 @@ import {
 import { getContainingFrame } from "./frame";
 import { getCornerRadius } from "./utils";
 
-import { ShapeCache } from "./shape";
+import {
+  getRainbowFreedrawColor,
+  getRainbowFreedrawSegments,
+  getRainbowFreedrawStrokeWidth,
+  isRainbowFreedrawElement,
+  ShapeCache,
+} from "./shape";
 
 import type {
   ExcalidrawElement,
@@ -384,6 +390,45 @@ const drawImagePlaceholder = (
   );
 };
 
+const drawRainbowFreedrawStroke = (
+  element: ExcalidrawFreeDrawElement,
+  context: CanvasRenderingContext2D,
+  outlinePath: Path2D,
+) => {
+  const segments = getRainbowFreedrawSegments(element);
+
+  if (!segments.length) {
+    context.fillStyle = getRainbowFreedrawColor();
+    context.fill(outlinePath);
+    return;
+  }
+
+  context.save();
+  context.clip(outlinePath);
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  context.lineWidth = getRainbowFreedrawStrokeWidth(element);
+
+  for (const segment of segments) {
+    const gradient = context.createLinearGradient(
+      segment.start[0],
+      segment.start[1],
+      segment.end[0],
+      segment.end[1],
+    );
+    gradient.addColorStop(0, segment.startColor);
+    gradient.addColorStop(1, segment.endColor);
+
+    context.strokeStyle = gradient;
+    context.beginPath();
+    context.moveTo(segment.start[0], segment.start[1]);
+    context.lineTo(segment.end[0], segment.end[1]);
+    context.stroke();
+  }
+
+  context.restore();
+};
+
 const drawElementOnCanvas = (
   element: NonDeletedExcalidrawElement,
   rc: RoughCanvas,
@@ -422,11 +467,17 @@ const drawElementOnCanvas = (
 
       for (const shape of shapes) {
         if (typeof shape === "string") {
-          context.fillStyle = applyDarkModeFilter(
-            element.strokeColor,
-            renderConfig.theme === THEME.DARK,
-          );
-          context.fill(new Path2D(shape));
+          const path = new Path2D(shape);
+
+          if (isRainbowFreedrawElement(element)) {
+            drawRainbowFreedrawStroke(element, context, path);
+          } else {
+            context.fillStyle = applyDarkModeFilter(
+              element.strokeColor,
+              renderConfig.theme === THEME.DARK,
+            );
+            context.fill(path);
+          }
         } else {
           rc.draw(shape);
         }
