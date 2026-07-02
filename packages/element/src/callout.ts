@@ -18,7 +18,10 @@ export const getCalloutTailHeight = (
   if (absHeight === 0) {
     return 0;
   }
-  return Math.sign(element.height || 1) * Math.min(CALLOUT_TAIL_MAX_HEIGHT, absHeight / 3);
+  return (
+    Math.sign(element.height || 1) *
+    Math.min(CALLOUT_TAIL_MAX_HEIGHT, absHeight / 3)
+  );
 };
 
 export const getCalloutBodyHeight = (
@@ -85,7 +88,8 @@ export const getCalloutPath = (
   const r = Math.min(radius, Math.abs(width) / 2, absBodyHeight / 2);
   const tailCenterX = width * 0.58;
   const tailTipX = width * 0.48;
-  const tailHalfWidth = getCalloutTailHalfWidth(element) * Math.sign(width || 1);
+  const tailHalfWidth =
+    getCalloutTailHalfWidth(element) * Math.sign(width || 1);
   const tailBaseLeft = tailCenterX - tailHalfWidth;
   const tailBaseRight = tailCenterX + tailHalfWidth;
 

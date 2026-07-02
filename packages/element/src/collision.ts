@@ -506,13 +506,27 @@ const intersectCalloutWithLineSegment = (
     element.y + element.height / 2,
   );
 
-  lineIntersections(sides, segment, intersections, center, 0 as Radians, onlyFirst);
+  lineIntersections(
+    sides,
+    segment,
+    intersections,
+    center,
+    0 as Radians,
+    onlyFirst,
+  );
 
   if (onlyFirst && intersections.length > 0) {
     return intersections;
   }
 
-  curveIntersections(curves, segment, intersections, center, 0 as Radians, onlyFirst);
+  curveIntersections(
+    curves,
+    segment,
+    intersections,
+    center,
+    0 as Radians,
+    onlyFirst,
+  );
 
   return intersections;
 };
