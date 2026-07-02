@@ -30,7 +30,7 @@ import {
 
 import { RoughGenerator } from "roughjs/bin/generator";
 
-import type { GlobalPoint } from "@excalidraw/math";
+import type { GlobalPoint, Polygon } from "@excalidraw/math";
 
 import type { Mutable } from "@excalidraw/common/utility-types";
 
@@ -1101,7 +1101,7 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
           type: "polygon",
           data: getCalloutGlobalPoints(
             element as ExcalidrawCalloutElement,
-          ) as Point[],
+          ) as Polygon<Point>,
         };
       }
       return getPolygonShape(element);
