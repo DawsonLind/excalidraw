@@ -290,8 +290,9 @@ export class API {
       case "rectangle":
       case "diamond":
       case "ellipse":
+      case "callout":
         element = newElement({
-          type: type as "rectangle" | "diamond" | "ellipse",
+          type: type as "rectangle" | "diamond" | "ellipse" | "callout",
           ...base,
         });
         break;

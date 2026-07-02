@@ -48,6 +48,7 @@ import {
   isTextElement,
 } from "./typeChecks";
 import {
+  deconstructCalloutElement,
   deconstructDiamondElement,
   deconstructLinearOrFreeDrawElement,
   deconstructRectanguloidElement,
@@ -67,6 +68,7 @@ import type {
   ElementsMap,
   ExcalidrawArrowElement,
   ExcalidrawBindableElement,
+  ExcalidrawCalloutElement,
   ExcalidrawDiamondElement,
   ExcalidrawElement,
   ExcalidrawEllipseElement,
@@ -471,6 +473,8 @@ export const intersectElementWithLineSegment = (
         offset,
         onlyFirst,
       );
+    case "callout":
+      return intersectCalloutWithLineSegment(element, line, onlyFirst);
     case "ellipse":
       return intersectEllipseWithLineSegment(
         element,
@@ -488,6 +492,43 @@ export const intersectElementWithLineSegment = (
         onlyFirst,
       );
   }
+};
+
+const intersectCalloutWithLineSegment = (
+  element: ExcalidrawCalloutElement,
+  segment: LineSegment<GlobalPoint>,
+  onlyFirst = false,
+): GlobalPoint[] => {
+  const [sides, curves] = deconstructCalloutElement(element);
+  const intersections: GlobalPoint[] = [];
+  const center = pointFrom<GlobalPoint>(
+    element.x + element.width / 2,
+    element.y + element.height / 2,
+  );
+
+  lineIntersections(
+    sides,
+    segment,
+    intersections,
+    center,
+    0 as Radians,
+    onlyFirst,
+  );
+
+  if (onlyFirst && intersections.length > 0) {
+    return intersections;
+  }
+
+  curveIntersections(
+    curves,
+    segment,
+    intersections,
+    center,
+    0 as Radians,
+    onlyFirst,
+  );
+
+  return intersections;
 };
 
 const curveIntersections = (

@@ -3,6 +3,7 @@ import { KEYS } from "@excalidraw/common";
 import {
   SelectionIcon,
   RectangleIcon,
+  SpeechBubbleIcon,
   DiamondIcon,
   EllipseIcon,
   ArrowIcon,
@@ -55,6 +56,14 @@ export const SHAPES = [
     value: "ellipse",
     key: KEYS.O,
     numericKey: KEYS["4"],
+    fillable: true,
+    toolbar: true,
+  },
+  {
+    icon: SpeechBubbleIcon,
+    value: "callout",
+    key: null,
+    numericKey: null,
     fillable: true,
     toolbar: true,
   },

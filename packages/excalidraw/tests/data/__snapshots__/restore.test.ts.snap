@@ -94,7 +94,7 @@ exports[`restoreElements > should restore arrow element correctly 1`] = `
 }
 `;
 
-exports[`restoreElements > should restore correctly with rectangle, ellipse and diamond elements 1`] = `
+exports[`restoreElements > should restore correctly with rectangle, ellipse, diamond and callout elements 1`] = `
 {
   "angle": 0,
   "backgroundColor": "blue",
@@ -132,7 +132,7 @@ exports[`restoreElements > should restore correctly with rectangle, ellipse and 
 }
 `;
 
-exports[`restoreElements > should restore correctly with rectangle, ellipse and diamond elements 2`] = `
+exports[`restoreElements > should restore correctly with rectangle, ellipse, diamond and callout elements 2`] = `
 {
   "angle": 0,
   "backgroundColor": "blue",
@@ -170,7 +170,7 @@ exports[`restoreElements > should restore correctly with rectangle, ellipse and 
 }
 `;
 
-exports[`restoreElements > should restore correctly with rectangle, ellipse and diamond elements 3`] = `
+exports[`restoreElements > should restore correctly with rectangle, ellipse, diamond and callout elements 3`] = `
 {
   "angle": 0,
   "backgroundColor": "blue",

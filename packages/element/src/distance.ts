@@ -9,6 +9,7 @@ import { ellipse, ellipseDistanceFromPoint } from "@excalidraw/math/ellipse";
 import type { GlobalPoint, Radians } from "@excalidraw/math";
 
 import {
+  deconstructCalloutElement,
   deconstructDiamondElement,
   deconstructLinearOrFreeDrawElement,
   deconstructRectanguloidElement,
@@ -18,6 +19,7 @@ import { elementCenterPoint } from "./bounds";
 
 import type {
   ElementsMap,
+  ExcalidrawCalloutElement,
   ExcalidrawDiamondElement,
   ExcalidrawElement,
   ExcalidrawEllipseElement,
@@ -43,6 +45,8 @@ export const distanceToElement = (
       return distanceToRectanguloidElement(element, elementsMap, p);
     case "diamond":
       return distanceToDiamondElement(element, elementsMap, p);
+    case "callout":
+      return distanceToCalloutElement(element, p);
     case "ellipse":
       return distanceToEllipseElement(element, elementsMap, p);
     case "line":
@@ -50,6 +54,20 @@ export const distanceToElement = (
     case "freedraw":
       return distanceToLinearOrFreeDraElement(element, elementsMap, p);
   }
+};
+
+const distanceToCalloutElement = (
+  element: ExcalidrawCalloutElement,
+  p: GlobalPoint,
+): number => {
+  const [sides, curves] = deconstructCalloutElement(element);
+
+  return Math.min(
+    ...sides.map((s) => distanceToLineSegment(p, s)),
+    ...curves
+      .map((a) => curvePointDistance(a, p))
+      .filter((d): d is number => d !== null),
+  );
 };
 
 /**
