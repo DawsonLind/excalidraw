@@ -46,7 +46,7 @@ type _ExcalidrawElementBase = Readonly<{
   fillStyle: FillStyle;
   strokeWidth: number;
   strokeStyle: StrokeStyle;
-  neonGlow: boolean;
+  neonGlow?: boolean;
   roundness: null | { type: RoundnessType; value?: number };
   roughness: number;
   opacity: number;

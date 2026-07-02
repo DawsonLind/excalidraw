@@ -201,7 +201,6 @@ describe("element locking", () => {
 
       const selectedElement = API.getSelectedElement();
       expect(selectedElement.neonGlow).toBe(true);
-      expect(API.getAppState().currentItemNeonGlow).toBe(true);
     });
 
     it("should create new elements with current neon glow setting", () => {

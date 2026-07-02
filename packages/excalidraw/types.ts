@@ -366,7 +366,7 @@ export interface AppState {
   currentItemFillStyle: ExcalidrawElement["fillStyle"];
   currentItemStrokeWidthKey: StrokeWidthKey;
   currentItemStrokeStyle: ExcalidrawElement["strokeStyle"];
-  currentItemNeonGlow: ExcalidrawElement["neonGlow"];
+  currentItemNeonGlow: boolean;
   currentItemRoughness: number;
   currentItemStrokeVariability: StrokeVariability;
   currentItemOpacity: number;
