@@ -10,6 +10,7 @@ import type { GlobalPoint, Radians } from "@excalidraw/math";
 
 import {
   deconstructDiamondElement,
+  deconstructHexagonElement,
   deconstructLinearOrFreeDrawElement,
   deconstructRectanguloidElement,
 } from "./utils";
@@ -22,6 +23,7 @@ import type {
   ExcalidrawElement,
   ExcalidrawEllipseElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHexagonElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
 } from "./types";
@@ -43,6 +45,8 @@ export const distanceToElement = (
       return distanceToRectanguloidElement(element, elementsMap, p);
     case "diamond":
       return distanceToDiamondElement(element, elementsMap, p);
+    case "hexagon":
+      return distanceToHexagonElement(element, elementsMap, p);
     case "ellipse":
       return distanceToEllipseElement(element, elementsMap, p);
     case "line":
@@ -101,6 +105,25 @@ const distanceToDiamondElement = (
   const rotatedPoint = pointRotateRads(p, center, -element.angle as Radians);
 
   const [sides, curves] = deconstructDiamondElement(element);
+
+  return Math.min(
+    ...sides.map((s) => distanceToLineSegment(rotatedPoint, s)),
+    ...curves
+      .map((a) => curvePointDistance(a, rotatedPoint))
+      .filter((d): d is number => d !== null),
+  );
+};
+
+const distanceToHexagonElement = (
+  element: ExcalidrawHexagonElement,
+  elementsMap: ElementsMap,
+  p: GlobalPoint,
+): number => {
+  const center = elementCenterPoint(element, elementsMap);
+
+  const rotatedPoint = pointRotateRads(p, center, -element.angle as Radians);
+
+  const [sides, curves] = deconstructHexagonElement(element);
 
   return Math.min(
     ...sides.map((s) => distanceToLineSegment(rotatedPoint, s)),

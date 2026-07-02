@@ -63,6 +63,7 @@ import {
   getArrowheadPoints,
   getDiamondPoints,
   getElementAbsoluteCoords,
+  getHexagonVertices,
 } from "./bounds";
 import { shouldTestInside } from "./collision";
 
@@ -230,6 +231,7 @@ export const generateRoughOptions = (
     case "iframe":
     case "embeddable":
     case "diamond":
+    case "hexagon":
     case "ellipse": {
       options.fillStyle = element.fillStyle;
       options.fill = isTransparent(element.backgroundColor)
@@ -860,6 +862,52 @@ const _generateElementShape = (
       }
       return shape;
     }
+    case "hexagon": {
+      let shape: ElementShapes[typeof element.type];
+      const vertices = getHexagonVertices(element);
+
+      if (element.roundness) {
+        const pathParts: string[] = [];
+        const n = vertices.length;
+
+        for (let i = 0; i < n; i++) {
+          const [vx, vy] = vertices[i];
+          const [pvx, pvy] = vertices[(i - 1 + n) % n];
+          const [nvx, nvy] = vertices[(i + 1) % n];
+
+          const prevEdgeLen = Math.hypot(vx - pvx, vy - pvy) || 1;
+          const nextEdgeLen = Math.hypot(vx - nvx, vy - nvy) || 1;
+          const radius = getCornerRadius(
+            Math.min(prevEdgeLen, nextEdgeLen) / 2,
+            element,
+          );
+
+          const startX = vx + ((pvx - vx) / prevEdgeLen) * radius;
+          const startY = vy + ((pvy - vy) / prevEdgeLen) * radius;
+          const endX = vx + ((nvx - vx) / nextEdgeLen) * radius;
+          const endY = vy + ((nvy - vy) / nextEdgeLen) * radius;
+
+          if (i === 0) {
+            pathParts.push(`M ${startX} ${startY}`);
+          }
+
+          pathParts.push(
+            `L ${startX} ${startY} C ${vx} ${vy}, ${vx} ${vy}, ${endX} ${endY}`,
+          );
+        }
+
+        shape = generator.path(
+          `${pathParts.join(" ")} Z`,
+          generateRoughOptions(element, true, isDarkMode),
+        );
+      } else {
+        shape = generator.polygon(
+          vertices,
+          generateRoughOptions(element, false, isDarkMode),
+        );
+      }
+      return shape;
+    }
     case "ellipse": {
       const shape: ElementShapes[typeof element.type] = generator.ellipse(
         element.width / 2,
@@ -1075,6 +1123,7 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
   switch (element.type) {
     case "rectangle":
     case "diamond":
+    case "hexagon":
     case "frame":
     case "magicframe":
     case "embeddable":

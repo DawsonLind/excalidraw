@@ -34,7 +34,7 @@ import type {
   Zoom,
 } from "@excalidraw/excalidraw/types";
 
-import { elementCenterPoint, getDiamondPoints } from "./bounds";
+import { elementCenterPoint, getDiamondPoints, getHexagonVertices } from "./bounds";
 
 import { generateLinearCollisionShape } from "./shape";
 
@@ -55,6 +55,7 @@ import type {
   ExcalidrawDiamondElement,
   ExcalidrawElement,
   ExcalidrawFreeDrawElement,
+  ExcalidrawHexagonElement,
   ExcalidrawLinearElement,
   ExcalidrawRectanguloidElement,
 } from "./types";
@@ -462,6 +463,79 @@ export function deconstructDiamondElement(
   return shape;
 }
 
+export function getHexagonBaseCorners(
+  element: ExcalidrawHexagonElement,
+  offset: number = 0,
+): Curve<GlobalPoint>[] {
+  const vertices = getHexagonVertices(element);
+
+  return vertices.map(([vx, vy], index) => {
+    const [pvx, pvy] = vertices[(index - 1 + vertices.length) % vertices.length];
+    const [nvx, nvy] = vertices[(index + 1) % vertices.length];
+
+    const vertex = pointFrom<GlobalPoint>(element.x + vx, element.y + vy);
+    const prev = pointFrom<GlobalPoint>(element.x + pvx, element.y + pvy);
+    const next = pointFrom<GlobalPoint>(element.x + nvx, element.y + nvy);
+
+    const prevEdgeLen = pointDistance(
+      pointFrom(vx, vy),
+      pointFrom(pvx, pvy),
+    );
+    const nextEdgeLen = pointDistance(
+      pointFrom(vx, vy),
+      pointFrom(nvx, nvy),
+    );
+    const radius = element.roundness
+      ? getCornerRadius(Math.min(prevEdgeLen, nextEdgeLen) / 2, element)
+      : Math.min(prevEdgeLen, nextEdgeLen) * 0.01;
+
+    const toPrev = vectorNormalize(vectorFromPoint(vertex, prev));
+    const toNext = vectorNormalize(vectorFromPoint(vertex, next));
+
+    return curve(
+      pointFromVector(vectorScale(toPrev, radius), vertex),
+      vertex,
+      vertex,
+      pointFromVector(vectorScale(toNext, radius), vertex),
+    );
+  });
+}
+
+/**
+ * Get the **unrotated** building components of a hexagon element
+ * in the form of line segments and curves as a tuple, in this order.
+ */
+export function deconstructHexagonElement(
+  element: ExcalidrawHexagonElement,
+  offset: number = 0,
+): [LineSegment<GlobalPoint>[], Curve<GlobalPoint>[]] {
+  const cachedShape = getElementShapesCacheEntry(element, offset);
+
+  if (cachedShape) {
+    return cachedShape;
+  }
+
+  const baseCorners = getHexagonBaseCorners(element, offset);
+
+  const corners = baseCorners.map(
+    (corner) =>
+      curveCatmullRomCubicApproxPoints(curveOffsetPoints(corner, offset))!,
+  );
+
+  const sides = corners.map((corner, index) =>
+    lineSegment<GlobalPoint>(
+      corner[corner.length - 1][3],
+      corners[(index + 1) % corners.length][0][0],
+    ),
+  );
+
+  const shape = [sides, corners.flat()] as ElementShape;
+
+  setElementShapesCacheEntry(element, shape, offset);
+
+  return shape;
+}
+
 // Checks if the first and last point are close enough
 // to be considered a loop
 export const isPathALoop = (
@@ -597,6 +671,13 @@ export const getSnapOutlineMidPoint = (
   const sideMidpoints =
     element.type === "diamond"
       ? getDiamondBaseCorners(element).map((curve) => {
+          const point = bezierEquation(curve, 0.5);
+          const rotatedPoint = pointRotateRads(point, center, element.angle);
+
+          return pointFrom<GlobalPoint>(rotatedPoint[0], rotatedPoint[1]);
+        })
+      : element.type === "hexagon"
+      ? getHexagonBaseCorners(element).map((curve) => {
           const point = bezierEquation(curve, 0.5);
           const rotatedPoint = pointRotateRads(point, center, element.angle);
 

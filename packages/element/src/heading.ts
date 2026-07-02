@@ -225,6 +225,129 @@ const headingForPointFromDiamondElement = (
   return headingForPoint(p, midPoint);
 };
 
+const headingForPointFromHexagonElement = (
+  element: Readonly<ExcalidrawBindableElement>,
+  aabb: Readonly<Bounds>,
+  point: Readonly<GlobalPoint>,
+): Heading => {
+  const midPoint = getCenterForBounds(aabb);
+  const SHRINK = 0.95;
+
+  const referencePoints = [
+    pointFrom<GlobalPoint>(element.x + element.width / 2, element.y),
+    pointFrom<GlobalPoint>(
+      element.x + element.width,
+      element.y + element.height / 2,
+    ),
+    pointFrom<GlobalPoint>(
+      element.x + element.width / 2,
+      element.y + element.height,
+    ),
+    pointFrom<GlobalPoint>(element.x, element.y + element.height / 2),
+    pointFrom<GlobalPoint>(element.x + (3 * element.width) / 4, element.y),
+    pointFrom<GlobalPoint>(
+      element.x + (3 * element.width) / 4,
+      element.y + element.height,
+    ),
+    pointFrom<GlobalPoint>(element.x + element.width / 4, element.y),
+    pointFrom<GlobalPoint>(
+      element.x + element.width / 4,
+      element.y + element.height,
+    ),
+  ].map((p) =>
+    pointFromVector(
+      vectorScale(
+        vectorFromPoint(pointRotateRads(p, midPoint, element.angle), midPoint),
+        SHRINK,
+      ),
+      midPoint,
+    ),
+  );
+
+  const [
+    top,
+    right,
+    bottom,
+    left,
+    topRight,
+    bottomRight,
+    topLeft,
+    bottomLeft,
+  ] = referencePoints;
+
+  if (
+    vectorCross(vectorFromPoint(point, top), vectorFromPoint(top, topRight)) <=
+      0 &&
+    vectorCross(vectorFromPoint(point, top), vectorFromPoint(top, topLeft)) > 0
+  ) {
+    return headingForPoint(top, midPoint);
+  }
+  if (
+    vectorCross(vectorFromPoint(point, right), vectorFromPoint(right, bottom)) <=
+      0 &&
+    vectorCross(vectorFromPoint(point, right), vectorFromPoint(right, top)) > 0
+  ) {
+    return headingForPoint(right, midPoint);
+  }
+  if (
+    vectorCross(
+      vectorFromPoint(point, bottom),
+      vectorFromPoint(bottom, bottomLeft),
+    ) <= 0 &&
+    vectorCross(
+      vectorFromPoint(point, bottom),
+      vectorFromPoint(bottom, bottomRight),
+    ) > 0
+  ) {
+    return headingForPoint(bottom, midPoint);
+  }
+  if (
+    vectorCross(vectorFromPoint(point, left), vectorFromPoint(left, top)) <= 0 &&
+    vectorCross(vectorFromPoint(point, left), vectorFromPoint(left, bottom)) > 0
+  ) {
+    return headingForPoint(left, midPoint);
+  }
+
+  if (
+    vectorCross(
+      vectorFromPoint(point, midPoint),
+      vectorFromPoint(topRight, midPoint),
+    ) <= 0 &&
+    vectorCross(
+      vectorFromPoint(point, midPoint),
+      vectorFromPoint(right, midPoint),
+    ) > 0
+  ) {
+    return headingForPoint(topRight, midPoint);
+  }
+  if (
+    vectorCross(
+      vectorFromPoint(point, midPoint),
+      vectorFromPoint(bottomRight, midPoint),
+    ) <= 0 &&
+    vectorCross(
+      vectorFromPoint(point, midPoint),
+      vectorFromPoint(bottom, midPoint),
+    ) > 0
+  ) {
+    return headingForPoint(bottomRight, midPoint);
+  }
+  if (
+    vectorCross(
+      vectorFromPoint(point, midPoint),
+      vectorFromPoint(bottomLeft, midPoint),
+    ) <= 0 &&
+    vectorCross(
+      vectorFromPoint(point, midPoint),
+      vectorFromPoint(left, midPoint),
+    ) > 0
+  ) {
+    return headingForPoint(bottomLeft, midPoint);
+  }
+
+  return headingForPoint(topLeft, midPoint);
+};
+
 // Gets the heading for the point by creating a bounding box around the rotated
 // close fitting bounding box, then creating 4 search cones around the center of
 // the external bbox.
@@ -239,6 +362,10 @@ export const headingForPointFromElement = <Point extends GlobalPoint>(
 
   if (element.type === "diamond") {
     return headingForPointFromDiamondElement(element, aabb, p);
+  }
+
+  if (element.type === "hexagon") {
+    return headingForPointFromHexagonElement(element, aabb, p);
   }
 
   const topLeft = pointScaleFromOrigin(

@@ -139,6 +139,28 @@ describe("Test dragCreate", () => {
       h.elements.forEach((element) => expect(element).toMatchSnapshot());
     });
 
+    it("hexagon", async () => {
+      const { getByToolName, container } = await render(<Excalidraw />);
+      const tool = getByToolName("hexagon");
+      fireEvent.click(tool);
+
+      const canvas = container.querySelector("canvas.interactive")!;
+
+      fireEvent.pointerDown(canvas, { clientX: 30, clientY: 20 });
+      fireEvent.pointerMove(canvas, { clientX: 60, clientY: 70 });
+      fireEvent.pointerUp(canvas);
+
+      expect(h.elements.length).toEqual(1);
+      expect(h.elements[0].type).toEqual("hexagon");
+      expect(h.elements[0].x).toEqual(30);
+      expect(h.elements[0].y).toEqual(20);
+      expect(h.elements[0].width).toEqual(30);
+      expect(h.elements[0].height).toEqual(50);
+
+      expect(h.elements.length).toMatchSnapshot();
+      h.elements.forEach((element) => expect(element).toMatchSnapshot());
+    });
+
     it("arrow", async () => {
       const { getByToolName, container } = await render(<Excalidraw />);
       // select tool

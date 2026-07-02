@@ -22,9 +22,11 @@ import {
 
 import {
   deconstructDiamondElement,
+  deconstructHexagonElement,
   deconstructRectanguloidElement,
   elementCenterPoint,
   getDiamondBaseCorners,
+  getHexagonBaseCorners,
   FOCUS_POINT_SIZE,
   getOmitSidesForEditorInterface,
   getTransformHandles,
@@ -325,10 +327,12 @@ const renderBindingHighlightForBindableElement_simple = (
           context.stroke();
           break;
         case "diamond":
+        case "hexagon":
           {
-            const [segments, curves] = deconstructDiamondElement(
-              suggestedBinding.element,
-            );
+            const [segments, curves] =
+              suggestedBinding.element.type === "diamond"
+                ? deconstructDiamondElement(suggestedBinding.element)
+                : deconstructHexagonElement(suggestedBinding.element);
 
             // Draw each line segment individually
             segments.forEach((segment) => {
@@ -450,6 +454,23 @@ const renderBindingHighlightForBindableElement_simple = (
           elementsMap,
         );
         midpoints = getDiamondBaseCorners(suggestedBinding.element).map(
+          (curve) => {
+            const point = bezierEquation(curve, 0.5);
+            const rotatedPoint = pointRotateRads(
+              point,
+              center,
+              suggestedBinding.element.angle,
+            );
+
+            return pointFrom<GlobalPoint>(rotatedPoint[0], rotatedPoint[1]);
+          },
+        );
+      } else if (suggestedBinding.element.type === "hexagon") {
+        const center = elementCenterPoint(
+          suggestedBinding.element,
+          elementsMap,
+        );
+        midpoints = getHexagonBaseCorners(suggestedBinding.element).map(
           (curve) => {
             const point = bezierEquation(curve, 0.5);
             const rotatedPoint = pointRotateRads(
@@ -666,11 +687,12 @@ const renderBindingHighlightForBindableElement_complex = (
           context.stroke();
           break;
         case "diamond":
+        case "hexagon":
           {
-            const [segments, curves] = deconstructDiamondElement(
-              element,
-              offset,
-            );
+            const [segments, curves] =
+              element.type === "diamond"
+                ? deconstructDiamondElement(element, offset)
+                : deconstructHexagonElement(element, offset);
 
             // Draw each line segment individually
             segments.forEach((segment) => {
@@ -822,6 +844,18 @@ const renderBindingHighlightForBindableElement_complex = (
       let midpoints;
       if (element.type === "diamond") {
         const [, curves] = deconstructDiamondElement(element);
+        const center = elementCenterPoint(element, allElementsMap);
+
+        midpoints = curves.map((curve) => {
+          const point = bezierEquation(curve, 0.5);
+          const rotatedPoint = pointRotateRads(point, center, element.angle);
+          return {
+            x: rotatedPoint[0] - element.x,
+            y: rotatedPoint[1] - element.y,
+          };
+        });
+      } else if (element.type === "hexagon") {
+        const [, curves] = deconstructHexagonElement(element);
         const center = elementCenterPoint(element, allElementsMap);
 
         midpoints = curves.map((curve) => {
