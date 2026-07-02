@@ -446,9 +446,11 @@ const drawElementOnCanvas = (
       context.lineCap = "round";
 
       drawWithNeonGlow(element, context, renderConfig, () => {
-        ShapeCache.generateElementShape(element, renderConfig).forEach((shape) => {
-          rc.draw(shape);
-        });
+        ShapeCache.generateElementShape(element, renderConfig).forEach(
+          (shape) => {
+            rc.draw(shape);
+          },
+        );
       });
       break;
     }

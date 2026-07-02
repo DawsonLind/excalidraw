@@ -421,9 +421,7 @@ const CombinedShapeProperties = ({
                 </>
               )}
               {(hasNeonGlow(appState.activeTool.type) ||
-                targetElements.some((element) =>
-                  hasNeonGlow(element.type),
-                )) &&
+                targetElements.some((element) => hasNeonGlow(element.type))) &&
                 renderAction("changeNeonGlow")}
               {(canChangeRoundness(appState.activeTool.type) ||
                 targetElements.some((element) =>
