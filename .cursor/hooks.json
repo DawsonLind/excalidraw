@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/guard-destructive-git.js",
+        "matcher": "git\\s",
+        "timeout": 5,
+        "failClosed": true
+      },
+      {
+        "command": ".cursor/hooks/confirm-release.js",
+        "matcher": "yarn\\s+(?:run\\s+)?release",
+        "timeout": 5,
+        "failClosed": true
+      }
+    ]
+  }
+}

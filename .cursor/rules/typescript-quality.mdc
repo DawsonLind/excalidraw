@@ -1,0 +1,26 @@
+---
+description: Apply Excalidraw TypeScript, React, and validation conventions
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# TypeScript Quality
+
+- Prefer immutable values and data structures. Use `const` and `readonly` when practical.
+- Use separate `import type` declarations for types.
+- Build React UI with focused function components and unconditional hooks.
+- Use CSS modules for component-specific styles.
+- For math code, use the shared `Point` type from `packages/math/src/types.ts` instead of ad hoc `{ x, y }` shapes.
+- Add or update a nearby Vitest test for behavior changes. Keep snapshots intentional and review their diffs.
+
+## Validation
+
+Start with the smallest relevant test, then run broader checks as warranted:
+
+```bash
+yarn test:app path/to/file.test.tsx --watch=false
+yarn test:typecheck
+yarn fix
+```
+
+Use `yarn test:update` only when snapshot changes are expected. Before a commit, follow the repository requirement to run it and inspect every update.
