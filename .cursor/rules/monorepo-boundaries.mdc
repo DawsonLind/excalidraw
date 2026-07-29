@@ -1,0 +1,14 @@
+---
+description: Keep changes within Excalidraw's monorepo and import boundaries
+alwaysApply: true
+---
+
+# Monorepo Boundaries
+
+- Put reusable editor behavior in `packages/excalidraw/` or the appropriate lower-level package.
+- Put excalidraw.com-only behavior, including collaboration, Firebase, and PWA code, in `excalidraw-app/`.
+- Keep examples in `examples/` focused on integration usage.
+- Lower-level packages must not depend on `@excalidraw/excalidraw` except for type-only imports.
+- Within `packages/excalidraw/`, import the concrete module directly instead of importing from the package barrel.
+- Never import `jotai` directly. Use `packages/excalidraw/editor-jotai.ts` in the editor or `excalidraw-app/app-jotai.ts` in the app.
+- Use the existing `@excalidraw/*` path aliases from `tsconfig.json` and `vitest.config.mts`; update both files when introducing an alias.
