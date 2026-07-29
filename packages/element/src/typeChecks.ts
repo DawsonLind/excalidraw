@@ -184,7 +184,6 @@ export const isBindableElement = (
     (element.type === "rectangle" ||
       element.type === "diamond" ||
       element.type === "ellipse" ||
-      element.type === "speechbubble" ||
       element.type === "image" ||
       element.type === "iframe" ||
       element.type === "embeddable" ||
@@ -238,7 +237,6 @@ export const isTextBindableContainer = (
     (element.type === "rectangle" ||
       element.type === "diamond" ||
       element.type === "ellipse" ||
-      element.type === "speechbubble" ||
       isArrowElement(element))
   );
 };
@@ -257,7 +255,6 @@ export const isExcalidrawElement = (
     case "iframe":
     case "embeddable":
     case "ellipse":
-    case "speechbubble":
     case "arrow":
     case "freedraw":
     case "line":
@@ -312,7 +309,6 @@ export const isUsingAdaptiveRadius = (type: string) =>
   type === "rectangle" ||
   type === "embeddable" ||
   type === "iframe" ||
-  type === "speechbubble" ||
   type === "image";
 
 export const isUsingProportionalRadius = (type: string) =>
@@ -402,7 +398,6 @@ export const isEligibleFrameChildType = (type: ElementOrToolType) => {
     case "rectangle":
     case "diamond":
     case "ellipse":
-    case "speechbubble":
     case "arrow":
     case "line":
     case "freedraw":
