@@ -456,6 +456,7 @@ export const intersectElementWithLineSegment = (
     case "frame":
     case "selection":
     case "magicframe":
+    case "speechbubble":
       return intersectRectanguloidWithLineSegment(
         element,
         elementsMap,

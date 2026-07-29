@@ -230,7 +230,8 @@ export const generateRoughOptions = (
     case "iframe":
     case "embeddable":
     case "diamond":
-    case "ellipse": {
+    case "ellipse":
+    case "speechbubble": {
       options.fillStyle = element.fillStyle;
       options.fill = isTransparent(element.backgroundColor)
         ? undefined
@@ -870,6 +871,51 @@ const _generateElementShape = (
       );
       return shape;
     }
+    case "speechbubble": {
+      let shape: ElementShapes[typeof element.type];
+      
+      const w = element.width;
+      const h = element.height;
+      const tailWidth = Math.min(w * 0.15, 30);
+      const tailHeight = Math.min(h * 0.2, 30);
+      const tailStartX = w * 0.2;
+      
+      if (element.roundness) {
+        const radius = getCornerRadius(Math.min(w, h), element);
+        
+        // Create speech bubble path with rounded corners and tail
+        shape = generator.path(
+          `M ${radius} 0 
+           L ${w - radius} 0 
+           Q ${w} 0 ${w} ${radius} 
+           L ${w} ${h - radius} 
+           Q ${w} ${h} ${w - radius} ${h}
+           L ${tailStartX + tailWidth} ${h}
+           L ${tailStartX + tailWidth / 2} ${h + tailHeight}
+           L ${tailStartX} ${h}
+           L ${radius} ${h}
+           Q 0 ${h} 0 ${h - radius}
+           L 0 ${radius}
+           Q 0 0 ${radius} 0
+           Z`,
+          generateRoughOptions(element, true, isDarkMode),
+        );
+      } else {
+        // Create speech bubble path without rounded corners
+        shape = generator.path(
+          `M 0 0 
+           L ${w} 0 
+           L ${w} ${h}
+           L ${tailStartX + tailWidth} ${h}
+           L ${tailStartX + tailWidth / 2} ${h + tailHeight}
+           L ${tailStartX} ${h}
+           L 0 ${h}
+           Z`,
+          generateRoughOptions(element, true, isDarkMode),
+        );
+      }
+      return shape;
+    }
     case "line":
     case "arrow": {
       let shape: ElementShapes[typeof element.type];
@@ -1075,6 +1121,7 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
   switch (element.type) {
     case "rectangle":
     case "diamond":
+    case "speechbubble":
     case "frame":
     case "magicframe":
     case "embeddable":
