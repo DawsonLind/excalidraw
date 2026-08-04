@@ -441,6 +441,10 @@ import ConvertElementTypePopup, {
   convertElementTypePopupAtom,
   convertElementTypes,
 } from "./ConvertElementTypePopup";
+import {
+  ConfettiOverlay,
+  confettiTriggerAtom,
+} from "./Confetti/Confetti";
 
 import { activeConfirmDialogAtom } from "./ActiveConfirmDialog";
 import BraveMeasureTextError from "./BraveMeasureTextError";
@@ -2140,6 +2144,7 @@ class App extends React.Component<AppProps, AppState> {
 
     const showShapeSwitchPanel =
       editorJotaiStore.get(convertElementTypePopupAtom)?.type === "panel";
+    const confettiTrigger = editorJotaiStore.get(confettiTriggerAtom);
 
     return (
       <div
@@ -2411,6 +2416,14 @@ class App extends React.Component<AppProps, AppState> {
                             onTouchMove={this.handleTouchMove}
                             onPointerDown={this.handleCanvasPointerDown}
                             onDoubleClick={this.handleCanvasDoubleClick}
+                          />
+                          <ConfettiOverlay
+                            width={this.state.width}
+                            height={this.state.height}
+                            trigger={confettiTrigger}
+                            onDone={() =>
+                              this.updateEditorAtom(confettiTriggerAtom, 0)
+                            }
                           />
                           {this.state.userToFollow && (
                             <FollowMode

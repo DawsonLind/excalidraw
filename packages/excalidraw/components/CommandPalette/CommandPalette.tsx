@@ -52,12 +52,14 @@ import {
   brainIconThin,
   LibraryIcon,
   historyCommandIcon,
+  confettiIcon,
 } from "../icons";
 
 import { SHAPES } from "../shapes";
 import { canChangeBackgroundColor, canChangeStrokeColor } from "../Actions";
 import { useStableCallback } from "../../hooks/useStableCallback";
 import { activeConfirmDialogAtom } from "../ActiveConfirmDialog";
+import { confettiTriggerAtom } from "../Confetti/Confetti";
 import { useStable } from "../../hooks/useStable";
 
 import { Ellipsify } from "../Ellipsify";
@@ -453,6 +455,16 @@ function CommandPaletteInner({
           viewMode: true,
           perform: () => {
             actionManager.executeAction(actionToggleSearchMenu);
+          },
+        },
+        {
+          label: t("labels.confetti"),
+          category: DEFAULT_CATEGORIES.app,
+          icon: confettiIcon,
+          keywords: ["celebrate", "party", "fun"],
+          viewMode: true,
+          perform: () => {
+            app.updateEditorAtom(confettiTriggerAtom, (trigger) => trigger + 1);
           },
         },
         {
