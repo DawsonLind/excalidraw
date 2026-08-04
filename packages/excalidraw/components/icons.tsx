@@ -358,6 +358,16 @@ export const EllipseIcon = createIcon(
   tablerIconProps,
 );
 
+// tabler-icons: heart
+export const HeartIcon = createIcon(
+  <g strokeWidth="1.5">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M19.5 12.572 L 12 20 L 4.5 12.572 C 3.375 11.448 3 10.016 3 8.625 C 3 5.898 5.123 3.75 7.875 3.75 C 9.594 3.75 11.117 4.594 12 5.898 C 12.883 4.594 14.406 3.75 16.125 3.75 C 18.877 3.75 21 5.898 21 8.625 C 21 10.016 20.625 11.448 19.5 12.572" />
+  </g>,
+
+  tablerIconProps,
+);
+
 // tabler-icons: arrow-narrow-right
 export const ArrowIcon = createIcon(
   <g strokeWidth="1.5">
