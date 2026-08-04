@@ -498,7 +498,6 @@ export const TOOL_TYPE = {
   magicframe: "magicframe",
   embeddable: "embeddable",
   laser: "laser",
-  speechbubble: "speechbubble",
 } as const;
 
 export const EDITOR_LS_KEYS = {

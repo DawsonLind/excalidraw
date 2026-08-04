@@ -97,10 +97,6 @@ export type ExcalidrawEllipseElement = _ExcalidrawElementBase & {
   type: "ellipse";
 };
 
-export type ExcalidrawSpeechBubbleElement = _ExcalidrawElementBase & {
-  type: "speechbubble";
-};
-
 export type ExcalidrawEmbeddableElement = _ExcalidrawElementBase &
   Readonly<{
     type: "embeddable";
@@ -185,8 +181,7 @@ export type ExcalidrawGenericElement =
   | ExcalidrawSelectionElement
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
-  | ExcalidrawEllipseElement
-  | ExcalidrawSpeechBubbleElement;
+  | ExcalidrawEllipseElement;
 
 export type ExcalidrawFlowchartNodeElement =
   | ExcalidrawRectangleElement
@@ -201,8 +196,7 @@ export type ExcalidrawRectanguloidElement =
   | ExcalidrawIframeLikeElement
   | ExcalidrawFrameLikeElement
   | ExcalidrawEmbeddableElement
-  | ExcalidrawSelectionElement
-  | ExcalidrawSpeechBubbleElement;
+  | ExcalidrawSelectionElement;
 
 /**
  * ExcalidrawElement should be JSON serializable and (eventually) contain
@@ -266,7 +260,6 @@ export type ExcalidrawBindableElement =
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
   | ExcalidrawEllipseElement
-  | ExcalidrawSpeechBubbleElement
   | ExcalidrawTextElement
   | ExcalidrawImageElement
   | ExcalidrawIframeElement
@@ -458,6 +451,6 @@ export type ExcalidrawLinearElementSubType =
   | "curvedArrow"
   | "elbowArrow";
 
-export type ConvertibleGenericTypes = "rectangle" | "diamond" | "ellipse" | "speechbubble";
+export type ConvertibleGenericTypes = "rectangle" | "diamond" | "ellipse";
 export type ConvertibleLinearTypes = ExcalidrawLinearElementSubType;
 export type ConvertibleTypes = ConvertibleGenericTypes | ConvertibleLinearTypes;

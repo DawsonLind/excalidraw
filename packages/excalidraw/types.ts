@@ -148,7 +148,6 @@ export type ToolType =
   | "rectangle"
   | "diamond"
   | "ellipse"
-  | "speechbubble"
   | "arrow"
   | "line"
   | "freedraw"
