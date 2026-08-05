@@ -230,7 +230,8 @@ export const generateRoughOptions = (
     case "iframe":
     case "embeddable":
     case "diamond":
-    case "ellipse": {
+    case "ellipse":
+    case "heart": {
       options.fillStyle = element.fillStyle;
       options.fill = isTransparent(element.backgroundColor)
         ? undefined
@@ -870,6 +871,22 @@ const _generateElementShape = (
       );
       return shape;
     }
+    case "heart": {
+      const w = element.width;
+      const h = element.height;
+      const shape: ElementShapes[typeof element.type] = generator.path(
+        `M ${w / 2} ${h}
+         C ${w / 2} ${h} 0 ${h * 0.583} 0 ${h * 0.333}
+         C 0 ${h * 0.125} ${w * 0.111} 0 ${w * 0.222} 0
+         C ${w * 0.333} 0 ${w * 0.444} ${h * 0.125} ${w / 2} ${h * 0.25}
+         C ${w * 0.556} ${h * 0.125} ${w * 0.667} 0 ${w * 0.778} 0
+         C ${w * 0.889} 0 ${w} ${h * 0.125} ${w} ${h * 0.333}
+         C ${w} ${h * 0.583} ${w / 2} ${h} ${w / 2} ${h}
+         Z`,
+        generateRoughOptions(element, true, isDarkMode),
+      );
+      return shape;
+    }
     case "line":
     case "arrow": {
       let shape: ElementShapes[typeof element.type];
@@ -1075,6 +1092,7 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
   switch (element.type) {
     case "rectangle":
     case "diamond":
+    case "heart":
     case "frame":
     case "magicframe":
     case "embeddable":
