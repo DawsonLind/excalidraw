@@ -71,7 +71,8 @@ export const SHAPES = [
   {
     icon: TriangleIcon,
     value: "triangle",
-    key: KEYS.G,
+    // `G` is taken by the background color picker
+    key: KEYS.W,
     numericKey: null,
     fillable: true,
     toolbar: true,
