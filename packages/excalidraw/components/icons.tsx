@@ -2192,6 +2192,22 @@ export const boltIcon = createIcon(
   </g>,
   tablerIconProps,
 );
+
+export const confettiIcon = createIcon(
+  <g strokeWidth={1.5}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M4 20l5.5 -14.5l9 9l-14.5 5.5" />
+    <path d="M13 6l1 -2" />
+    <path d="M18 9l2 -1" />
+    <path d="M11 12l-2.5 -2.5" />
+    <path d="M15 16l-7 -7" />
+    <path d="M14 4l.01 0" />
+    <path d="M19 5l.01 0" />
+    <path d="M20 13l.01 0" />
+  </g>,
+  tablerIconProps,
+);
+
 export const selectAllIcon = createIcon(
   <g>
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
