@@ -185,6 +185,7 @@ export const isBindableElement = (
       element.type === "diamond" ||
       element.type === "ellipse" ||
       element.type === "heart" ||
+      element.type === "triangle" ||
       element.type === "image" ||
       element.type === "iframe" ||
       element.type === "embeddable" ||
@@ -240,6 +241,7 @@ export const isTextBindableContainer = (
       element.type === "diamond" ||
       element.type === "ellipse" ||
       element.type === "heart" ||
+      element.type === "triangle" ||
       isArrowElement(element))
   );
 };
@@ -259,6 +261,7 @@ export const isExcalidrawElement = (
     case "embeddable":
     case "ellipse":
     case "heart":
+    case "triangle":
     case "arrow":
     case "freedraw":
     case "line":
@@ -282,7 +285,8 @@ export const isFlowchartNodeElement = (
     element.type === "rectangle" ||
     element.type === "ellipse" ||
     element.type === "diamond" ||
-    element.type === "heart"
+    element.type === "heart" ||
+    element.type === "triangle"
   );
 };
 
@@ -404,6 +408,7 @@ export const isEligibleFrameChildType = (type: ElementOrToolType) => {
     case "diamond":
     case "ellipse":
     case "heart":
+    case "triangle":
     case "arrow":
     case "line":
     case "freedraw":

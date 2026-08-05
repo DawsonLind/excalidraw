@@ -6,6 +6,7 @@ import {
   DiamondIcon,
   EllipseIcon,
   HeartIcon,
+  TriangleIcon,
   ArrowIcon,
   LineIcon,
   FreedrawIcon,
@@ -62,6 +63,14 @@ export const SHAPES = [
   {
     icon: HeartIcon,
     value: "heart",
+    key: KEYS.C,
+    numericKey: null,
+    fillable: true,
+    toolbar: true,
+  },
+  {
+    icon: TriangleIcon,
+    value: "triangle",
     key: KEYS.G,
     numericKey: null,
     fillable: true,

@@ -104,6 +104,23 @@ describe("getElementBounds", () => {
     expect(y2).toEqual(42.071067811865476);
   });
 
+  it("triangle", () => {
+    const element = _ce({
+      x: 40,
+      y: 30,
+      w: 20,
+      h: 10,
+      t: "triangle",
+    });
+
+    const [x1, y1, x2, y2] = getElementBounds(element, arrayToMap([element]));
+
+    expect(x1).toEqual(40);
+    expect(y1).toEqual(30);
+    expect(x2).toEqual(60);
+    expect(y2).toEqual(40);
+  });
+
   it("ellipse", () => {
     const element = _ce({
       x: 40,

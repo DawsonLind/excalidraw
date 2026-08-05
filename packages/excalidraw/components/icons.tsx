@@ -368,6 +368,16 @@ export const HeartIcon = createIcon(
   tablerIconProps,
 );
 
+// tabler-icons: triangle
+export const TriangleIcon = createIcon(
+  <g strokeWidth="1.5">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M12 4 L20 20 L4 20 Z" />
+  </g>,
+
+  tablerIconProps,
+);
+
 // tabler-icons: arrow-narrow-right
 export const ArrowIcon = createIcon(
   <g strokeWidth="1.5">

@@ -51,6 +51,7 @@ import {
   deconstructDiamondElement,
   deconstructLinearOrFreeDrawElement,
   deconstructRectanguloidElement,
+  deconstructTriangleElement,
 } from "./utils";
 
 import { getBoundTextElement } from "./textElement";
@@ -68,6 +69,7 @@ import type {
   ExcalidrawArrowElement,
   ExcalidrawBindableElement,
   ExcalidrawDiamondElement,
+  ExcalidrawTriangleElement,
   ExcalidrawElement,
   ExcalidrawEllipseElement,
   ExcalidrawFreeDrawElement,
@@ -472,6 +474,13 @@ export const intersectElementWithLineSegment = (
         offset,
         onlyFirst,
       );
+    case "triangle":
+      return intersectTriangleWithLineSegment(
+        element,
+        elementsMap,
+        line,
+        onlyFirst,
+      );
     case "ellipse":
       return intersectEllipseWithLineSegment(
         element,
@@ -604,6 +613,30 @@ const intersectLinearOrFreeDrawWithLineSegment = (
   }
 
   return intersections;
+};
+
+const intersectTriangleWithLineSegment = (
+  element: ExcalidrawTriangleElement,
+  elementsMap: ElementsMap,
+  l: LineSegment<GlobalPoint>,
+  onlyFirst = false,
+): GlobalPoint[] => {
+  const center = elementCenterPoint(element, elementsMap);
+
+  const rotatedA = pointRotateRads(l[0], center, -element.angle as Radians);
+  const rotatedB = pointRotateRads(l[1], center, -element.angle as Radians);
+  const rotatedIntersector = lineSegment(rotatedA, rotatedB);
+
+  const [sides] = deconstructTriangleElement(element);
+
+  return lineIntersections(
+    sides,
+    rotatedIntersector,
+    [],
+    center,
+    element.angle,
+    onlyFirst,
+  );
 };
 
 const intersectRectanguloidWithLineSegment = (

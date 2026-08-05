@@ -53,6 +53,7 @@ import type {
   ExcalidrawArrowElement,
   ExcalidrawBindableElement,
   ExcalidrawDiamondElement,
+  ExcalidrawTriangleElement,
   ExcalidrawElement,
   ExcalidrawFreeDrawElement,
   ExcalidrawLinearElement,
@@ -462,6 +463,30 @@ export function deconstructDiamondElement(
   return shape;
 }
 
+export function deconstructTriangleElement(
+  element: ExcalidrawTriangleElement,
+  offset: number = 0,
+): [LineSegment<GlobalPoint>[], Curve<GlobalPoint>[]] {
+  const { width, height, x, y } = element;
+  const top = pointFrom<GlobalPoint>(x + width / 2, y - offset);
+  const bottomRight = pointFrom<GlobalPoint>(
+    x + width + offset,
+    y + height + offset,
+  );
+  const bottomLeft = pointFrom<GlobalPoint>(
+    x - offset,
+    y + height + offset,
+  );
+
+  const sides = [
+    lineSegment(top, bottomRight),
+    lineSegment(bottomRight, bottomLeft),
+    lineSegment(bottomLeft, top),
+  ];
+
+  return [sides, []];
+}
+
 // Checks if the first and last point are close enough
 // to be considered a loop
 export const isPathALoop = (
@@ -602,6 +627,17 @@ export const getSnapOutlineMidPoint = (
 
           return pointFrom<GlobalPoint>(rotatedPoint[0], rotatedPoint[1]);
         })
+      : element.type === "triangle"
+      ? (() => {
+          const [sides] = deconstructTriangleElement(element);
+          return sides.map((side) => {
+            const midPoint = pointFrom<GlobalPoint>(
+              (side[0][0] + side[1][0]) / 2,
+              (side[0][1] + side[1][1]) / 2,
+            );
+            return pointRotateRads(midPoint, center, element.angle);
+          });
+        })()
       : [
           // RIGHT midpoint
           pointRotateRads(

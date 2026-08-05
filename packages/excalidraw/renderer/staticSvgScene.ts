@@ -148,6 +148,7 @@ const renderElementToSvg = (
     case "rectangle":
     case "diamond":
     case "ellipse":
+    case "triangle":
     case "heart": {
       const shape = ShapeCache.generateElementShape(element, renderConfig);
       const node = roughSVGDrawWithPrecision(
