@@ -266,6 +266,10 @@ export const dragNewElement = ({
   } | null;
   informMutation?: boolean;
 }) => {
+  if (newElement.type === "diamond") {
+    return;
+  }
+
   if (shouldMaintainAspectRatio && newElement.type !== "selection") {
     if (widthAspectRatio) {
       height = width / widthAspectRatio;
