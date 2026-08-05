@@ -56,6 +56,8 @@ describe("shortcuts", () => {
       [KEYS.F, "frame tool"],
     ]);
 
+    const conflicts: string[] = [];
+
     for (const shape of SHAPES) {
       const keys = !shape.key
         ? []
@@ -64,16 +66,17 @@ describe("shortcuts", () => {
         : shape.key;
 
       for (const key of keys) {
-        const conflict = reservedKeys.get(key);
+        const owner = reservedKeys.get(key);
 
-        expect(
-          conflict,
-          `"${key}" is bound to both the ${shape.value} tool and ${conflict}`,
-        ).toBeUndefined();
+        if (owner) {
+          conflicts.push(`"${key}": ${shape.value} tool vs ${owner}`);
+        }
 
         reservedKeys.set(key, shape.value);
       }
     }
+
+    expect(conflicts).toEqual([]);
   });
 
   it("G should open the background color picker instead of switching tools", async () => {
