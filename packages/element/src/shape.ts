@@ -30,7 +30,7 @@ import {
 
 import { RoughGenerator } from "roughjs/bin/generator";
 
-import type { GlobalPoint } from "@excalidraw/math";
+import type { GlobalPoint, Polygon } from "@excalidraw/math";
 
 import type { Mutable } from "@excalidraw/common/utility-types";
 
@@ -45,6 +45,7 @@ import type {
 } from "@excalidraw/excalidraw/scene/types";
 
 import { elementWithCanvasCache } from "./renderElement";
+import { getCalloutGlobalPoints, getCalloutPath } from "./callout";
 
 import {
   canBecomePolygon,
@@ -75,6 +76,7 @@ import type {
   ElementsMap,
   ExcalidrawLineElement,
   Arrowhead,
+  ExcalidrawCalloutElement,
 } from "./types";
 
 import type { Drawable, Options } from "roughjs/bin/core";
@@ -229,6 +231,7 @@ export const generateRoughOptions = (
     case "rectangle":
     case "iframe":
     case "embeddable":
+    case "callout":
     case "diamond":
     case "ellipse":
     case "heart": {
@@ -814,6 +817,16 @@ const _generateElementShape = (
       }
       return shape;
     }
+    case "callout": {
+      const radius = element.roundness
+        ? getCornerRadius(Math.min(element.width, element.height), element)
+        : 0;
+      const shape: ElementShapes[typeof element.type] = generator.path(
+        getCalloutPath(element, radius),
+        generateRoughOptions(element, true, isDarkMode),
+      );
+      return shape;
+    }
     case "diamond": {
       let shape: ElementShapes[typeof element.type];
 
@@ -1093,6 +1106,7 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
     case "rectangle":
     case "diamond":
     case "heart":
+    case "callout":
     case "frame":
     case "magicframe":
     case "embeddable":
@@ -1100,6 +1114,14 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
     case "iframe":
     case "text":
     case "selection":
+      if (element.type === "callout") {
+        return {
+          type: "polygon",
+          data: getCalloutGlobalPoints(
+            element as ExcalidrawCalloutElement,
+          ) as Polygon<Point>,
+        };
+      }
       return getPolygonShape(element);
     case "arrow":
     case "line": {

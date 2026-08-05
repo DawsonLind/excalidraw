@@ -24,6 +24,7 @@ import { LinearElementEditor } from "./linearElementEditor";
 
 import { measureText } from "./textMeasurements";
 import { wrapText } from "./textWrapping";
+import { CALLOUT_TAIL_MAX_HEIGHT, getCalloutBodyHeight } from "./callout";
 import {
   isBoundToContainer,
   isArrowElement,
@@ -437,6 +438,7 @@ const VALID_CONTAINER_TYPES = new Set([
   "rectangle",
   "ellipse",
   "diamond",
+  "callout",
   "arrow",
 ]);
 
@@ -457,6 +459,9 @@ export const computeContainerDimensionForBoundText = (
   }
   if (containerType === "arrow") {
     return dimension + padding * 8;
+  }
+  if (containerType === "callout") {
+    return dimension + padding + CALLOUT_TAIL_MAX_HEIGHT;
   }
   if (containerType === "diamond") {
     return 2 * (dimension + padding);
@@ -511,6 +516,9 @@ export const getBoundTextMaxHeight = (
     // The height of the largest rectangle inscribed inside a rhombus is
     // Math.round(height / 2) - https://github.com/excalidraw/excalidraw/pull/6265
     return Math.round(height / 2) - BOUND_TEXT_PADDING * 2;
+  }
+  if (container.type === "callout") {
+    return getCalloutBodyHeight(container) - BOUND_TEXT_PADDING * 2;
   }
   return height - BOUND_TEXT_PADDING * 2;
 };

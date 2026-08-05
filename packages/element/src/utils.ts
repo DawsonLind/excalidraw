@@ -35,6 +35,7 @@ import type {
 } from "@excalidraw/excalidraw/types";
 
 import { elementCenterPoint, getDiamondPoints } from "./bounds";
+import { getCalloutLineSegments } from "./callout";
 
 import { generateLinearCollisionShape } from "./shape";
 
@@ -52,6 +53,7 @@ import type {
   ElementsMap,
   ExcalidrawArrowElement,
   ExcalidrawBindableElement,
+  ExcalidrawCalloutElement,
   ExcalidrawDiamondElement,
   ExcalidrawElement,
   ExcalidrawFreeDrawElement,
@@ -337,6 +339,12 @@ export function deconstructRectanguloidElement(
   setElementShapesCacheEntry(element, shape, offset);
 
   return shape;
+}
+
+export function deconstructCalloutElement(
+  element: ExcalidrawCalloutElement,
+): [LineSegment<GlobalPoint>[], Curve<GlobalPoint>[]] {
+  return [getCalloutLineSegments(element), []];
 }
 
 export function getDiamondBaseCorners(

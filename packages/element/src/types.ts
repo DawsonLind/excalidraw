@@ -101,6 +101,10 @@ export type ExcalidrawHeartElement = _ExcalidrawElementBase & {
   type: "heart";
 };
 
+export type ExcalidrawCalloutElement = _ExcalidrawElementBase & {
+  type: "callout";
+};
+
 export type ExcalidrawEmbeddableElement = _ExcalidrawElementBase &
   Readonly<{
     type: "embeddable";
@@ -186,13 +190,15 @@ export type ExcalidrawGenericElement =
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
   | ExcalidrawEllipseElement
-  | ExcalidrawHeartElement;
+  | ExcalidrawHeartElement
+  | ExcalidrawCalloutElement;
 
 export type ExcalidrawFlowchartNodeElement =
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
   | ExcalidrawEllipseElement
-  | ExcalidrawHeartElement;
+  | ExcalidrawHeartElement
+  | ExcalidrawCalloutElement;
 
 export type ExcalidrawRectanguloidElement =
   | ExcalidrawRectangleElement
@@ -268,6 +274,7 @@ export type ExcalidrawBindableElement =
   | ExcalidrawDiamondElement
   | ExcalidrawEllipseElement
   | ExcalidrawHeartElement
+  | ExcalidrawCalloutElement
   | ExcalidrawTextElement
   | ExcalidrawImageElement
   | ExcalidrawIframeElement
@@ -280,6 +287,7 @@ export type ExcalidrawTextContainer =
   | ExcalidrawDiamondElement
   | ExcalidrawEllipseElement
   | ExcalidrawHeartElement
+  | ExcalidrawCalloutElement
   | ExcalidrawArrowElement;
 
 export type ExcalidrawTextElementWithContainer = {

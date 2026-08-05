@@ -40,6 +40,17 @@ describe("Test measureText", () => {
       });
     });
 
+    it("should compute coords correctly when callout", () => {
+      const element = API.createElement({
+        type: "callout",
+        ...params,
+      });
+      expect(getContainerCoords(element)).toEqual({
+        x: 15,
+        y: 25,
+      });
+    });
+
     it("should compute coords correctly when diamond", () => {
       const element = API.createElement({
         type: "diamond",
@@ -100,6 +111,11 @@ describe("Test measureText", () => {
       expect(getBoundTextMaxWidth(container, null)).toBe(168);
     });
 
+    it("should return max width when container is callout", () => {
+      const container = API.createElement({ type: "callout", ...params });
+      expect(getBoundTextMaxWidth(container, null)).toBe(168);
+    });
+
     it("should return max width when container is ellipse", () => {
       const container = API.createElement({ type: "ellipse", ...params });
       expect(getBoundTextMaxWidth(container, null)).toBe(116);
@@ -136,6 +152,11 @@ describe("Test measureText", () => {
     it("should return max height when container is rectangle", () => {
       const container = API.createElement({ type: "rectangle", ...params });
       expect(getBoundTextMaxHeight(container, boundTextElement)).toBe(184);
+    });
+
+    it("should return max height when container is callout", () => {
+      const container = API.createElement({ type: "callout", ...params });
+      expect(getBoundTextMaxHeight(container, boundTextElement)).toBe(152);
     });
 
     it("should return max height when container is ellipse", () => {
