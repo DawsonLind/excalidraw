@@ -307,9 +307,7 @@ export const ToggleTheme = (
           </DropdownMenuItem>
         )}
         {THEME_IDS.map((id) => {
-          const label = t(
-            THEME_REGISTRY[id].labelKey as TranslationKeys,
-          );
+          const label = t(THEME_REGISTRY[id].labelKey as TranslationKeys);
           return (
             <DropdownMenuItem
               key={id}

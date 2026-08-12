@@ -17,7 +17,9 @@ const readStoredAppTheme = (): Theme | "system" => {
 };
 
 export const useHandleAppTheme = () => {
-  const [appTheme, setAppTheme] = useState<Theme | "system">(readStoredAppTheme);
+  const [appTheme, setAppTheme] = useState<Theme | "system">(
+    readStoredAppTheme,
+  );
   const [editorTheme, setEditorTheme] = useState<Theme>(THEME.LIGHT);
 
   useEffect(() => {

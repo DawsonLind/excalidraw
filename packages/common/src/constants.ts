@@ -230,10 +230,7 @@ export const THEME_REGISTRY = {
     labelKey: "themes.forest",
     swatch: "#10160f",
   },
-} as const satisfies Record<
-  ThemeValue,
-  { appearance: ThemeAppearance; labelKey: string; swatch: string }
->;
+} as const;
 
 export const THEME_IDS = [
   THEME.LIGHT,
@@ -242,7 +239,7 @@ export const THEME_IDS = [
   THEME.HIGH_CONTRAST,
   THEME.MIDNIGHT,
   THEME.FOREST,
-] as const satisfies readonly ThemeValue[];
+] as const;
 
 const THEME_PALETTE_IDS = THEME_IDS.filter(
   (id): id is Exclude<ThemeValue, "light" | "dark"> =>
@@ -257,19 +254,19 @@ export const parseTheme = (
   fallback: ThemeValue = THEME.LIGHT,
 ): ThemeValue => (isTheme(value) ? value : fallback);
 
-export const getThemeAppearance = (theme: ThemeValue): ThemeAppearance =>
+export const getThemeAppearance = (theme: unknown): ThemeAppearance =>
   THEME_REGISTRY[parseTheme(theme)].appearance;
 
-export const isDarkTheme = (theme: ThemeValue): boolean =>
+export const isDarkTheme = (theme: unknown): boolean =>
   getThemeAppearance(theme) === "dark";
 
-export const getNextTheme = (theme: ThemeValue): ThemeValue => {
+export const getNextTheme = (theme: unknown): ThemeValue => {
   const current = parseTheme(theme);
   const index = THEME_IDS.indexOf(current);
   return THEME_IDS[(index + 1) % THEME_IDS.length];
 };
 
-export const getThemeClassNames = (theme: ThemeValue): string[] => {
+export const getThemeClassNames = (theme: unknown): string[] => {
   const parsed = parseTheme(theme);
   const classNames: string[] = [];
   if (isDarkTheme(parsed)) {
@@ -281,7 +278,7 @@ export const getThemeClassNames = (theme: ThemeValue): string[] => {
   return classNames;
 };
 
-export const applyThemeClasses = (element: Element, theme: ThemeValue) => {
+export const applyThemeClasses = (element: Element, theme: unknown) => {
   const next = new Set(getThemeClassNames(theme));
   element.classList.toggle("theme--dark", next.has("theme--dark"));
   for (const id of THEME_PALETTE_IDS) {

@@ -506,7 +506,9 @@ describe("<Excalidraw/>", () => {
 
       expect(h.state.theme).toBe(THEME.FOREST);
       expect(
-        container.querySelector(".excalidraw")?.classList.contains("theme--forest"),
+        container
+          .querySelector(".excalidraw")
+          ?.classList.contains("theme--forest"),
       ).toBe(true);
     });
   });
