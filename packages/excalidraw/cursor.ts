@@ -93,10 +93,9 @@ export const setCursorForShape = (
     // a image-preview set as the cursor
     // Ignore custom type as well and let host decide
   } else if (appState.activeTool.type === "laser") {
-    const url =
-      !isDarkTheme(appState.theme)
-        ? laserPointerCursorDataURL_lightMode
-        : laserPointerCursorDataURL_darkMode;
+    const url = !isDarkTheme(appState.theme)
+      ? laserPointerCursorDataURL_lightMode
+      : laserPointerCursorDataURL_darkMode;
     interactiveCanvas.style.cursor = `url(${url}), auto`;
   } else if (!["image", "custom"].includes(appState.activeTool.type)) {
     interactiveCanvas.style.cursor = CURSOR_TYPE.CROSSHAIR;

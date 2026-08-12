@@ -123,8 +123,9 @@ export const renderRemoteCursors = ({
     }
 
     // TODO remove the dark theme color after we stop inverting canvas colors
-    const IS_SPEAKING_COLOR =
-      isDarkTheme(appState.theme) ? "#2f6330" : COLOR_VOICE_CALL;
+    const IS_SPEAKING_COLOR = isDarkTheme(appState.theme)
+      ? "#2f6330"
+      : COLOR_VOICE_CALL;
 
     const isSpeaking = collaborator?.isSpeaking;
 

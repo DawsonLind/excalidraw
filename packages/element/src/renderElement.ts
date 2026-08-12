@@ -819,10 +819,9 @@ export const renderElement = (
 
         // TODO change later to only affect AI frames
         if (isMagicFrameElement(element)) {
-          context.strokeStyle =
-            !isDarkTheme(appState.theme)
-              ? "#7affd7"
-              : applyDarkModeFilter("#1d8264");
+          context.strokeStyle = !isDarkTheme(appState.theme)
+            ? "#7affd7"
+            : applyDarkModeFilter("#1d8264");
         }
 
         if (FRAME_STYLE.radius && context.roundRect) {

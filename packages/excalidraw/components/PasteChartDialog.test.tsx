@@ -6,10 +6,10 @@ import {
   applyDarkModeFilter,
 } from "@excalidraw/common";
 
+import type { Theme } from "@excalidraw/element/types";
+
 import { Excalidraw } from "../index";
 import { render, waitFor } from "../tests/test-utils";
-
-import type { Theme } from "@excalidraw/element/types";
 
 import type { Spreadsheet } from "../charts";
 
