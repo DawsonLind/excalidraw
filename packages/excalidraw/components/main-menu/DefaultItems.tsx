@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-import { THEME } from "@excalidraw/common";
+import { THEME_IDS, THEME_REGISTRY } from "@excalidraw/common";
 
 import type { Theme } from "@excalidraw/element/types";
 
@@ -23,7 +23,7 @@ import { getShortcutFromShortcutName } from "../../actions/shortcuts";
 import { trackEvent } from "../../analytics";
 import { useUIAppState } from "../../context/ui-appState";
 import { useSetAtom } from "../../editor-jotai";
-import { useI18n } from "../../i18n";
+import { useI18n, type TranslationKeys } from "../../i18n";
 import { activeConfirmDialogAtom } from "../ActiveConfirmDialog";
 import {
   useExcalidrawSetAppState,
@@ -45,18 +45,15 @@ import {
   XBrandIcon,
   settingsIcon,
   emptyIcon,
-} from "../icons";
-import {
   boltIcon,
   DeviceDesktopIcon,
   ExportIcon,
   ExportImageIcon,
   HelpIcon,
   LoadIcon,
-  MoonIcon,
   save,
   searchIcon,
-  SunIcon,
+  palette,
   TrashIcon,
   usersIcon,
 } from "../icons";
@@ -228,6 +225,20 @@ export const ClearCanvas = () => {
 };
 ClearCanvas.displayName = "ClearCanvas";
 
+const ThemeSwatch = ({ color }: { color: string }) => (
+  <span
+    className="theme-swatch"
+    style={{
+      width: 14,
+      height: 14,
+      borderRadius: 4,
+      background: color,
+      border: "1px solid var(--color-border-outline-variant)",
+      flexShrink: 0,
+    }}
+  />
+);
+
 export const ToggleTheme = (
   props:
     | {
@@ -253,65 +264,70 @@ export const ToggleTheme = (
     return null;
   }
 
-  if (props?.allowSystemTheme) {
-    return (
-      <DropdownMenuItemContentRadio
-        name="theme"
-        value={props.theme}
-        onChange={(value: Theme | "system") => {
-          if (appProps.onThemeChange) {
-            appProps.onThemeChange(value);
-            return;
-          }
+  const selected = props.allowSystemTheme ? props.theme : appState.theme;
 
-          console.warn(
-            "MainMenu.DefaultItems.ToggleTheme: `<Excalidraw/> props.onThemeChange` must be defined to use system theme selection.",
-          );
-        }}
-        choices={[
-          {
-            value: THEME.LIGHT,
-            label: SunIcon,
-            ariaLabel: `${t("buttons.lightMode")} - ${shortcut}`,
-          },
-          {
-            value: THEME.DARK,
-            label: MoonIcon,
-            ariaLabel: `${t("buttons.darkMode")} - ${shortcut}`,
-          },
-          {
-            value: "system",
-            label: DeviceDesktopIcon,
-            ariaLabel: t("buttons.systemMode"),
-          },
-        ]}
-      >
-        {t("labels.theme")}
-      </DropdownMenuItemContentRadio>
-    );
-  }
+  const selectTheme = (theme: Theme | "system") => {
+    if (theme === "system") {
+      if (appProps.onThemeChange) {
+        appProps.onThemeChange("system");
+        return;
+      }
+
+      console.warn(
+        "MainMenu.DefaultItems.ToggleTheme: `<Excalidraw/> props.onThemeChange` must be defined to use system theme selection.",
+      );
+      return;
+    }
+
+    actionManager.executeAction(actionToggleTheme, "ui", theme);
+  };
 
   return (
-    <DropdownMenuItem
-      onSelect={(event) => {
-        // do not close the menu when changing theme
-        event.preventDefault();
-
-        actionManager.executeAction(actionToggleTheme);
-      }}
-      icon={appState.theme === THEME.DARK ? SunIcon : MoonIcon}
-      data-testid="toggle-dark-mode"
-      shortcut={shortcut}
-      aria-label={
-        appState.theme === THEME.DARK
-          ? t("buttons.lightMode")
-          : t("buttons.darkMode")
-      }
-    >
-      {appState.theme === THEME.DARK
-        ? t("buttons.lightMode")
-        : t("buttons.darkMode")}
-    </DropdownMenuItem>
+    <DropdownMenuSub>
+      <DropdownMenuSub.Trigger
+        icon={palette}
+        shortcut={shortcut}
+        data-testid="toggle-dark-mode"
+      >
+        {t("labels.theme")}
+      </DropdownMenuSub.Trigger>
+      <DropdownMenuSub.Content className="excalidraw-main-menu-theme-submenu">
+        {props.allowSystemTheme && (
+          <DropdownMenuItem
+            icon={DeviceDesktopIcon}
+            selected={selected === "system"}
+            onSelect={(event) => {
+              event.preventDefault();
+              selectTheme("system");
+            }}
+            data-testid="theme-system"
+            aria-label={t("buttons.systemMode")}
+          >
+            {t("buttons.systemMode")}
+          </DropdownMenuItem>
+        )}
+        {THEME_IDS.map((id) => {
+          const label = t(
+            THEME_REGISTRY[id].labelKey as TranslationKeys,
+          );
+          return (
+            <DropdownMenuItem
+              key={id}
+              icon={<ThemeSwatch color={THEME_REGISTRY[id].swatch} />}
+              selected={selected === id}
+              onSelect={(event) => {
+                event.preventDefault();
+                selectTheme(id);
+              }}
+              data-testid={`theme-${id}`}
+              aria-label={label}
+            >
+              {label}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuSub.Content>
+    </DropdownMenuSub>
   );
 };
 ToggleTheme.displayName = "ToggleTheme";

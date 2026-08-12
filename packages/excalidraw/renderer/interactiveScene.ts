@@ -17,7 +17,7 @@ import {
   FRAME_STYLE,
   getFeatureFlag,
   invariant,
-  THEME,
+  isDarkTheme,
 } from "@excalidraw/common";
 
 import {
@@ -264,7 +264,7 @@ const renderBindingHighlightForBindableElement_simple = (
 
       context.lineWidth = FRAME_STYLE.strokeWidth / appState.zoom.value;
       context.strokeStyle =
-        appState.theme === THEME.DARK
+        isDarkTheme(appState.theme)
           ? `rgba(3, 93, 161, 1)`
           : `rgba(106, 189, 252, 1)`;
 
@@ -305,7 +305,7 @@ const renderBindingHighlightForBindableElement_simple = (
         clamp(1.75, suggestedBinding.element.strokeWidth, 4) /
         Math.max(0.25, appState.zoom.value);
       context.strokeStyle =
-        appState.theme === THEME.DARK
+        isDarkTheme(appState.theme)
           ? `rgba(3, 93, 161, 1)`
           : `rgba(106, 189, 252, 1)`;
 
@@ -532,7 +532,7 @@ const renderBindingHighlightForBindableElement_simple = (
 
         if (isHighlighted) {
           context.fillStyle =
-            appState.theme === THEME.DARK
+            isDarkTheme(appState.theme)
               ? `rgba(3, 93, 161, 1)`
               : `rgba(106, 189, 252, 1)`;
 
@@ -541,7 +541,7 @@ const renderBindingHighlightForBindableElement_simple = (
           context.fill();
         } else if (isShown) {
           context.fillStyle =
-            appState.theme === THEME.DARK
+            isDarkTheme(appState.theme)
               ? `rgba(0, 0, 0, 0.8)`
               : `rgba(65, 65, 65, 0.5)`;
           context.beginPath();
@@ -605,7 +605,7 @@ const renderBindingHighlightForBindableElement_complex = (
 
       context.lineWidth = FRAME_STYLE.strokeWidth / appState.zoom.value;
       context.strokeStyle =
-        appState.theme === THEME.DARK
+        isDarkTheme(appState.theme)
           ? `rgba(3, 93, 161, ${opacity})`
           : `rgba(106, 189, 252, ${opacity})`;
 
@@ -646,7 +646,7 @@ const renderBindingHighlightForBindableElement_complex = (
         clamp(2.5, element.strokeWidth * 1.75, 4) /
         Math.max(0.25, appState.zoom.value);
       context.strokeStyle =
-        appState.theme === THEME.DARK
+        isDarkTheme(appState.theme)
           ? `rgba(3, 93, 161, ${opacity / 2})`
           : `rgba(106, 189, 252, ${opacity / 2})`;
 
@@ -868,7 +868,7 @@ const renderBindingHighlightForBindableElement_complex = (
       });
 
       context.fillStyle =
-        appState.theme === THEME.DARK
+        isDarkTheme(appState.theme)
           ? `rgba(3, 93, 161, ${opacity})`
           : `rgba(106, 189, 252, ${opacity})`;
 
@@ -1995,7 +1995,7 @@ const _renderInteractiveScene = ({
       );
 
       context.save();
-      if (appState.theme === THEME.LIGHT) {
+      if (!isDarkTheme(appState.theme)) {
         if (focus) {
           context.fillStyle = "rgba(255, 124, 0, 0.4)";
         } else {

@@ -3,7 +3,7 @@ import {
   KEYS,
   CLASSES,
   POINTER_BUTTON,
-  THEME,
+  isDarkTheme,
   isWritableElement,
   getFontString,
   getFontFamilyString,
@@ -394,7 +394,7 @@ export const textWysiwyg = ({
         verticalAlign,
         color: applyDarkModeFilter(
           updatedTextElement.strokeColor,
-          appState.theme === THEME.DARK,
+          isDarkTheme(appState.theme),
         ),
         opacity: updatedTextElement.opacity / 100,
         maxHeight: `${editorMaxHeight}px`,

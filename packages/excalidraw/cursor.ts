@@ -1,4 +1,4 @@
-import { CURSOR_TYPE, MIME_TYPES, THEME } from "@excalidraw/common";
+import { CURSOR_TYPE, MIME_TYPES, isDarkTheme } from "@excalidraw/common";
 
 import { isHandToolActive, isEraserActive } from "./appState";
 
@@ -43,7 +43,7 @@ export const setEraserCursor = (
   const cursorImageSizePx = 20;
 
   const drawCanvas = () => {
-    const isDarkTheme = theme === THEME.DARK;
+    const darkAppearance = isDarkTheme(theme);
     eraserCanvasCache = document.createElement("canvas");
     eraserCanvasCache.theme = theme;
     eraserCanvasCache.height = cursorImageSizePx;
@@ -58,9 +58,9 @@ export const setEraserCursor = (
       0,
       2 * Math.PI,
     );
-    context.fillStyle = isDarkTheme ? "#000" : "#fff";
+    context.fillStyle = darkAppearance ? "#000" : "#fff";
     context.fill();
-    context.strokeStyle = isDarkTheme ? "#fff" : "#000";
+    context.strokeStyle = darkAppearance ? "#fff" : "#000";
     context.stroke();
     previewDataURL = eraserCanvasCache.toDataURL(MIME_TYPES.svg) as DataURL;
   };
@@ -94,7 +94,7 @@ export const setCursorForShape = (
     // Ignore custom type as well and let host decide
   } else if (appState.activeTool.type === "laser") {
     const url =
-      appState.theme === THEME.LIGHT
+      !isDarkTheme(appState.theme)
         ? laserPointerCursorDataURL_lightMode
         : laserPointerCursorDataURL_darkMode;
     interactiveCanvas.style.cursor = `url(${url}), auto`;

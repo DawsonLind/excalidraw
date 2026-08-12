@@ -17,6 +17,7 @@ import {
 import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
 
+import { isDarkTheme } from "@excalidraw/common";
 import type { Theme } from "@excalidraw/element/types";
 
 import { mermaidLite } from "./mermaid-lang-lite";
@@ -113,7 +114,7 @@ const getErrorLineExtension = (
 // ---- Helpers ----
 
 const getThemeExtensions = (theme: Theme) => {
-  if (theme === "dark") {
+  if (isDarkTheme(theme)) {
     return [darkTheme, syntaxHighlighting(darkHighlight)];
   }
   return [lightTheme, syntaxHighlighting(lightHighlight)];

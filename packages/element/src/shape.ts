@@ -20,6 +20,7 @@ import {
 import {
   ROUGHNESS,
   THEME,
+  isDarkTheme,
   isTransparent,
   assertNever,
   COLOR_PALETTE,
@@ -766,7 +767,7 @@ const _generateElementShape = (
     theme?: AppState["theme"];
   },
 ): ElementShape => {
-  const isDarkMode = theme === THEME.DARK;
+  const isDarkMode = isDarkTheme(theme);
   switch (element.type) {
     case "rectangle":
     case "iframe":

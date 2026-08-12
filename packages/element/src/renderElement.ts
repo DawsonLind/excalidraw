@@ -16,7 +16,7 @@ import {
   FRAME_STYLE,
   DARK_THEME_FILTER,
   MIME_TYPES,
-  THEME,
+  isDarkTheme,
   distance,
   getFontString,
   isRTL,
@@ -363,7 +363,7 @@ const drawImagePlaceholder = (
   context: CanvasRenderingContext2D,
   theme: StaticCanvasRenderConfig["theme"],
 ) => {
-  context.fillStyle = theme === THEME.DARK ? "#2E2E2E" : "#E7E7E7";
+  context.fillStyle = isDarkTheme(theme) ? "#2E2E2E" : "#E7E7E7";
   context.fillRect(0, 0, element.width, element.height);
 
   const imageMinWidthOrHeight = Math.min(element.width, element.height);
@@ -425,7 +425,7 @@ const drawElementOnCanvas = (
         if (typeof shape === "string") {
           context.fillStyle = applyDarkModeFilter(
             element.strokeColor,
-            renderConfig.theme === THEME.DARK,
+            isDarkTheme(renderConfig.theme),
           );
           context.fill(new Path2D(shape));
         } else {
@@ -469,7 +469,7 @@ const drawElementOnCanvas = (
             };
 
         const shouldInvertImage =
-          renderConfig.theme === THEME.DARK &&
+          isDarkTheme(renderConfig.theme) &&
           cacheEntry?.mimeType === MIME_TYPES.svg;
 
         if (shouldInvertImage && isSafari) {
@@ -558,7 +558,7 @@ const drawElementOnCanvas = (
         context.font = getFontString(element);
         context.fillStyle = applyDarkModeFilter(
           element.strokeColor,
-          renderConfig.theme === THEME.DARK,
+          isDarkTheme(renderConfig.theme),
         );
         context.textAlign = element.textAlign as CanvasTextAlign;
 
@@ -814,13 +814,13 @@ export const renderElement = (
         context.lineWidth = FRAME_STYLE.strokeWidth / appState.zoom.value;
         context.strokeStyle = applyDarkModeFilter(
           FRAME_STYLE.strokeColor,
-          appState.theme === THEME.DARK,
+          isDarkTheme(appState.theme),
         );
 
         // TODO change later to only affect AI frames
         if (isMagicFrameElement(element)) {
           context.strokeStyle =
-            appState.theme === THEME.LIGHT
+            !isDarkTheme(appState.theme)
               ? "#7affd7"
               : applyDarkModeFilter("#1d8264");
         }
@@ -952,7 +952,7 @@ export const renderElement = (
             context.save();
             context.fillStyle = applyDarkModeFilter(
               renderConfig.canvasBackgroundColor,
-              renderConfig.theme === THEME.DARK,
+              isDarkTheme(renderConfig.theme),
             );
             context.fillRect(holeX, holeY, holeWidth, holeHeight);
             context.restore();

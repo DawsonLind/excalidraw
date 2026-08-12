@@ -29,6 +29,8 @@ Please add the latest change on the top under the correct section.
 
 ### Features
 
+- Added named editor themes (Paper, High contrast, Midnight, Forest) alongside Light and Dark. `AppState.theme` and `onThemeChange` now accept those ids. Appearance (canvas invert / `theme--dark`) is derived from the theme registry. The main menu Theme control is a named picker. Shift+Alt+D cycles registered themes.
+
 - Added `ExcalidrawAPI.isDestroyed` flag. Set to `true` once the editor unmounts. Calling any `get*` method, `onStateChange`, or `onEvent` on a destroyed API instance will throw in development and `console.error` in production. The `ExcalidrawAPI` will be reset to `null` on umount, but to be extra safe, you should check `ExcalidrawAPI.isDestroyed` before calling these methods to guard against subtle race conditions in your code.
 
 - Added `onMount`, `onInitialize`, and `onUnmount` props. `onMount` receives `{ excalidrawAPI, container }` once the editor root is mounted. `onInitialize` fires once the initial scene has loaded. `onUnmount` fires just before unmounting.

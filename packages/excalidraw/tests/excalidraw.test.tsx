@@ -427,7 +427,7 @@ describe("<Excalidraw/>", () => {
       expect(queryByTestId(container, "dropdown-menu")).toMatchSnapshot();
     });
 
-    it("should update themeToggle text even if MainMenu memoized", async () => {
+    it("should update selected theme even if MainMenu memoized", async () => {
       const CustomExcalidraw = () => {
         const customMenu = useMemo(() => {
           return (
@@ -441,20 +441,14 @@ describe("<Excalidraw/>", () => {
       };
 
       const { container } = await render(<CustomExcalidraw />);
-      //open menu
       toggleMenu(container);
 
       expect(h.state.theme).toBe(THEME.LIGHT);
 
-      expect(
-        queryByTestId(container, "toggle-dark-mode")?.textContent,
-      ).toContain(t("buttons.darkMode"));
-
       fireEvent.click(queryByTestId(container, "toggle-dark-mode")!);
+      fireEvent.click(queryByTestId(document.body, "theme-dark")!);
 
-      expect(
-        queryByTestId(container, "toggle-dark-mode")?.textContent,
-      ).toContain(t("buttons.lightMode"));
+      expect(h.state.theme).toBe(THEME.DARK);
     });
 
     it("should show theme toggle when the theme prop and onThemeChange are defined", async () => {
@@ -476,12 +470,44 @@ describe("<Excalidraw/>", () => {
         <Excalidraw theme={THEME.LIGHT} onThemeChange={onThemeChange} />,
       );
 
-      //open menu
       toggleMenu(container);
       fireEvent.click(queryByTestId(container, "toggle-dark-mode")!);
+      fireEvent.click(queryByTestId(document.body, "theme-dark")!);
 
       expect(onThemeChange).toHaveBeenCalledWith(THEME.DARK);
       expect(h.state.theme).toBe(THEME.LIGHT);
+    });
+
+    it("should apply named theme classes on the editor", async () => {
+      const { container } = await render(<Excalidraw />);
+
+      act(() => {
+        h.setState({ theme: THEME.MIDNIGHT });
+      });
+
+      const editor = container.querySelector(".excalidraw");
+      expect(editor?.classList.contains("theme--dark")).toBe(true);
+      expect(editor?.classList.contains("theme--midnight")).toBe(true);
+
+      act(() => {
+        h.setState({ theme: THEME.PAPER });
+      });
+
+      expect(editor?.classList.contains("theme--dark")).toBe(false);
+      expect(editor?.classList.contains("theme--midnight")).toBe(false);
+      expect(editor?.classList.contains("theme--paper")).toBe(true);
+    });
+
+    it("should select a named theme from the picker", async () => {
+      const { container } = await render(<Excalidraw />);
+      toggleMenu(container);
+      fireEvent.click(queryByTestId(container, "toggle-dark-mode")!);
+      fireEvent.click(queryByTestId(document.body, "theme-forest")!);
+
+      expect(h.state.theme).toBe(THEME.FOREST);
+      expect(
+        container.querySelector(".excalidraw")?.classList.contains("theme--forest"),
+      ).toBe(true);
     });
   });
 });

@@ -22,6 +22,7 @@ import {
   STROKE_WIDTH,
   STROKE_WIDTH_KEYS,
   type StrokeWidthKey,
+  parseTheme,
 } from "@excalidraw/common";
 import {
   calculateFixedPointForNonElbowArrowBinding,
@@ -1149,6 +1150,7 @@ export const restoreAppState = (
       isFiniteNumber(appState.gridStep) ? appState.gridStep : DEFAULT_GRID_STEP,
     ),
     editingFrame: null,
+    theme: parseTheme(nextAppState.theme),
   };
 };
 

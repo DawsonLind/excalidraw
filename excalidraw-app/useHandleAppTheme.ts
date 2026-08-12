@@ -1,4 +1,4 @@
-import { THEME } from "@excalidraw/excalidraw";
+import { THEME, parseTheme } from "@excalidraw/excalidraw";
 import { useEffect, useLayoutEffect, useState } from "react";
 
 import type { Theme } from "@excalidraw/element/types";
@@ -8,15 +8,16 @@ import { STORAGE_KEYS } from "./app_constants";
 const getDarkThemeMediaQuery = (): MediaQueryList | undefined =>
   window.matchMedia?.("(prefers-color-scheme: dark)");
 
+const readStoredAppTheme = (): Theme | "system" => {
+  const stored = localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_THEME);
+  if (stored === "system") {
+    return "system";
+  }
+  return parseTheme(stored);
+};
+
 export const useHandleAppTheme = () => {
-  const [appTheme, setAppTheme] = useState<Theme | "system">(() => {
-    return (
-      (localStorage.getItem(STORAGE_KEYS.LOCAL_STORAGE_THEME) as
-        | Theme
-        | "system"
-        | null) || THEME.LIGHT
-    );
-  });
+  const [appTheme, setAppTheme] = useState<Theme | "system">(readStoredAppTheme);
   const [editorTheme, setEditorTheme] = useState<Theme>(THEME.LIGHT);
 
   useEffect(() => {
