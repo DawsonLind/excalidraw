@@ -240,6 +240,72 @@ export const DEFAULT_ELEMENT_BACKGROUND_COLOR_PALETTE = {
   ...COMMON_ELEMENT_SHADES,
 } as const;
 
+export const THEME_COLOR_PALETTE_NAMES = ["pastel", "neon", "earth"] as const;
+
+export type ThemeColorPaletteName = typeof THEME_COLOR_PALETTE_NAMES[number];
+export type ColorPalettePresetName = "default" | ThemeColorPaletteName;
+export type ThemeColorPalette = {
+  readonly [Key in keyof typeof DEFAULT_ELEMENT_STROKE_COLOR_PALETTE]: typeof DEFAULT_ELEMENT_STROKE_COLOR_PALETTE[Key] extends readonly string[]
+    ? ColorTuple
+    : string;
+};
+
+export const THEME_COLOR_PALETTES: Readonly<
+  Record<ThemeColorPaletteName, ThemeColorPalette>
+> = {
+  pastel: {
+    transparent: COLOR_PALETTE.transparent,
+    white: "#fffdfc",
+    gray: ["#fafafa", "#f2f2f2", "#dedede", "#b8b8b8", "#8c8c8c"],
+    black: "#5f5a62",
+    bronze: ["#fff8f3", "#f9e4d4", "#ecc5aa", "#d29b76", "#a96f4b"],
+    cyan: ["#effcff", "#d9f7fb", "#b5edf4", "#87dce8", "#5dc4d4"],
+    blue: ["#f1f6ff", "#dce8ff", "#bfd4ff", "#94b8f4", "#6d96d9"],
+    violet: ["#f7f3ff", "#e9ddff", "#d1bcf6", "#b89be8", "#9578ca"],
+    grape: ["#fcf2ff", "#f2dbf8", "#deb8e9", "#c794d5", "#a56db8"],
+    pink: ["#fff2f8", "#ffdce9", "#f8bad1", "#ec95b5", "#cf7094"],
+    green: ["#f2fbf3", "#ddf3df", "#bee5c1", "#94d39c", "#70b97b"],
+    teal: ["#effbf8", "#d6f3eb", "#afe5d7", "#82d2c0", "#5bb7a4"],
+    yellow: ["#fffbea", "#fff1bd", "#f9df93", "#e9c86e", "#cfaa4e"],
+    orange: ["#fff6ed", "#ffe4cb", "#f8c9a6", "#e8aa7e", "#cd865e"],
+    red: ["#fff2f1", "#ffdcd8", "#f5b8b2", "#e89089", "#cb6e68"],
+  },
+  neon: {
+    transparent: COLOR_PALETTE.transparent,
+    white: "#ffffff",
+    gray: ["#f4f5f7", "#dfe1e6", "#aeb4be", "#667080", "#252a34"],
+    black: "#11131a",
+    bronze: ["#fff8e6", "#ffe3a3", "#ffbf3f", "#ff9400", "#cc6f00"],
+    cyan: ["#e6ffff", "#a3ffff", "#38f9ff", "#00d9e6", "#00a8bd"],
+    blue: ["#edf2ff", "#b6c8ff", "#6a8dff", "#335cff", "#1438d1"],
+    violet: ["#f5edff", "#d8b4ff", "#b066ff", "#8a2cff", "#6414d4"],
+    grape: ["#fff0ff", "#f8b4ff", "#eb5cff", "#d719f0", "#a900c2"],
+    pink: ["#fff0fa", "#ffb3e6", "#ff5fc4", "#ff1aa8", "#d90082"],
+    green: ["#ecffef", "#acffb7", "#48ff66", "#00e82c", "#00b321"],
+    teal: ["#e8fff8", "#a0ffdf", "#35f5b8", "#00d693", "#00a874"],
+    yellow: ["#fffde8", "#fff89d", "#fff238", "#f5db00", "#c4aa00"],
+    orange: ["#fff4e6", "#ffc996", "#ff8a30", "#ff5a00", "#d13f00"],
+    red: ["#fff0ed", "#ffb7ae", "#ff6255", "#ff291a", "#d90f00"],
+  },
+  earth: {
+    transparent: COLOR_PALETTE.transparent,
+    white: "#fffdf8",
+    gray: ["#f5f3ed", "#e6e1d7", "#cbc3b4", "#978d7e", "#5f574d"],
+    black: "#3f392f",
+    bronze: ["#f7efe6", "#e8d7c4", "#ceb397", "#a78362", "#765a43"],
+    cyan: ["#eef7f5", "#d4e8e4", "#aecfc8", "#78aaa2", "#4f7e78"],
+    blue: ["#eef3f4", "#d7e2e4", "#b2c7cc", "#7c9fa8", "#536f78"],
+    violet: ["#f3f0f2", "#e1d8df", "#c7b5c1", "#9f8395", "#745f6c"],
+    grape: ["#f5eff1", "#e5d3da", "#caaab5", "#a57988", "#765563"],
+    pink: ["#f8f0ed", "#ead7d0", "#d0b1a7", "#aa8175", "#7b5b52"],
+    green: ["#f0f5eb", "#dce7d1", "#bfd1ad", "#8fa873", "#647b4d"],
+    teal: ["#edf5f0", "#d3e5da", "#accdbb", "#78a28a", "#52745f"],
+    yellow: ["#faf5df", "#eee2ae", "#d9ca7d", "#b29e4f", "#7d7037"],
+    orange: ["#f9efe3", "#ead3b8", "#d2ad83", "#aa7c50", "#795738"],
+    red: ["#f7ece8", "#e5cbc2", "#ca9e91", "#a56f60", "#774e44"],
+  },
+};
+
 // color palette helpers
 // -----------------------------------------------------------------------------
 

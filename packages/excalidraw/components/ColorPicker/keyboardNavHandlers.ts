@@ -1,4 +1,4 @@
-import { COLORS_PER_ROW, COLOR_PALETTE, KEYS } from "@excalidraw/common";
+import { COLORS_PER_ROW, KEYS } from "@excalidraw/common";
 
 import type {
   ColorPickerColor,
@@ -119,6 +119,7 @@ interface ColorPickerKeyNavHandlerProps {
   activeShade: number;
   onEyeDropperToggle: (force?: boolean) => void;
   onEscape: (event: React.KeyboardEvent | KeyboardEvent) => void;
+  showPalettePresets: boolean;
 }
 
 /**
@@ -136,6 +137,7 @@ export const colorPickerKeyNavHandler = ({
   activeShade,
   onEyeDropperToggle,
   onEscape,
+  showPalettePresets,
 }: ColorPickerKeyNavHandlerProps): boolean => {
   if (event[KEYS.CTRL_OR_CMD]) {
     return false;
@@ -164,6 +166,7 @@ export const colorPickerKeyNavHandler = ({
       NonNullable<ActiveColorPickerSectionAtomType>,
       boolean
     > = {
+      palettePresets: showPalettePresets,
       custom: !!customColors.length,
       baseColors: true,
       shades: colorObj?.shade != null,
@@ -207,7 +210,14 @@ export const colorPickerKeyNavHandler = ({
       });
 
       if (!baseColorName) {
-        onChange(COLOR_PALETTE.black);
+        const fallbackColor = palette.black ?? Object.values(palette)[0];
+        if (fallbackColor) {
+          onChange(
+            Array.isArray(fallbackColor)
+              ? fallbackColor[activeShade]
+              : fallbackColor,
+          );
+        }
       }
     }
 
@@ -244,28 +254,27 @@ export const colorPickerKeyNavHandler = ({
   }
 
   if (activeColorPickerSection === "baseColors") {
-    if (colorObj) {
-      const { colorName } = colorObj;
-      const colorNames = Object.keys(palette) as (keyof ColorPalette)[];
-      const indexOfColorName = colorNames.indexOf(colorName);
+    const colorNames = Object.keys(palette) as (keyof ColorPalette)[];
+    const indexOfColorName = colorObj
+      ? colorNames.indexOf(colorObj.colorName)
+      : null;
 
-      const newColorIndex = arrowHandler(
-        event.key,
-        indexOfColorName,
-        colorNames.length,
+    const newColorIndex = arrowHandler(
+      event.key,
+      indexOfColorName,
+      colorNames.length,
+    );
+
+    if (newColorIndex !== undefined) {
+      const newColorName = colorNames[newColorIndex];
+      const newColorNameValue = palette[newColorName];
+
+      onChange(
+        Array.isArray(newColorNameValue)
+          ? newColorNameValue[activeShade]
+          : newColorNameValue,
       );
-
-      if (newColorIndex !== undefined) {
-        const newColorName = colorNames[newColorIndex];
-        const newColorNameValue = palette[newColorName];
-
-        onChange(
-          Array.isArray(newColorNameValue)
-            ? newColorNameValue[activeShade]
-            : newColorNameValue,
-        );
-        return true;
-      }
+      return true;
     }
   }
 

@@ -1,13 +1,43 @@
 import {
   applyDarkModeFilter,
   COLOR_PALETTE,
+  DEFAULT_ELEMENT_STROKE_COLOR_PALETTE,
   rgbToHex,
+  THEME_COLOR_PALETTE_NAMES,
+  THEME_COLOR_PALETTES,
 } from "@excalidraw/common";
 
 describe("COLOR_PALETTE", () => {
   it("color palette doesn't regress", () => {
     expect(COLOR_PALETTE).toMatchSnapshot();
   });
+});
+
+describe("THEME_COLOR_PALETTES", () => {
+  it.each(THEME_COLOR_PALETTE_NAMES)(
+    "%s keeps the default palette keys and shade structure",
+    (name) => {
+      const palette = THEME_COLOR_PALETTES[name];
+      const defaultEntries = Object.entries(
+        DEFAULT_ELEMENT_STROKE_COLOR_PALETTE,
+      );
+
+      expect(Object.keys(palette)).toEqual(
+        Object.keys(DEFAULT_ELEMENT_STROKE_COLOR_PALETTE),
+      );
+      expect(Object.keys(palette)).toHaveLength(15);
+
+      defaultEntries.forEach(([key, defaultValue]) => {
+        const value = palette[key as keyof typeof palette];
+
+        if (Array.isArray(defaultValue)) {
+          expect(value).toHaveLength(5);
+        } else {
+          expect(typeof value).toBe("string");
+        }
+      });
+    },
+  );
 });
 
 describe("applyDarkModeFilter", () => {

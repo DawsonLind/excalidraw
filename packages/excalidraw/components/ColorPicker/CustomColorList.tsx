@@ -26,7 +26,7 @@ export const CustomColorList = ({
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (btnRef.current) {
+    if (btnRef.current && activeColorPickerSection === "custom") {
       btnRef.current.focus();
     }
   }, [color, activeColorPickerSection]);

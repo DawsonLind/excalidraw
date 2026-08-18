@@ -39,10 +39,11 @@ const PickerColorList = ({
   );
 
   const btnRef = useRef<HTMLButtonElement>(null);
+  const firstBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (btnRef.current && activeColorPickerSection === "baseColors") {
-      btnRef.current.focus();
+    if (activeColorPickerSection === "baseColors") {
+      (btnRef.current ?? firstBtnRef.current)?.focus();
     }
   }, [colorObj?.colorName, activeColorPickerSection]);
 
@@ -61,7 +62,13 @@ const PickerColorList = ({
 
         return (
           <button
-            ref={colorObj?.colorName === key ? btnRef : undefined}
+            ref={
+              colorObj?.colorName === key
+                ? btnRef
+                : index === 0
+                ? firstBtnRef
+                : undefined
+            }
             tabIndex={-1}
             type="button"
             className={clsx(

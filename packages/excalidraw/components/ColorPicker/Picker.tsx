@@ -6,16 +6,21 @@ import {
   DEFAULT_ELEMENT_BACKGROUND_COLOR_INDEX,
   DEFAULT_ELEMENT_STROKE_COLOR_INDEX,
   KEYS,
+  THEME_COLOR_PALETTES,
 } from "@excalidraw/common";
 
 import type { ExcalidrawElement } from "@excalidraw/element/types";
 
-import type { ColorPaletteCustom } from "@excalidraw/common";
+import type {
+  ColorPaletteCustom,
+  ColorPalettePresetName,
+} from "@excalidraw/common";
 
 import { useAtom } from "../../editor-jotai";
 import { t } from "../../i18n";
 
 import { CustomColorList } from "./CustomColorList";
+import { PalettePresets } from "./PalettePresets";
 import PickerColorList from "./PickerColorList";
 import PickerHeading from "./PickerHeading";
 import { ShadeList } from "./ShadeList";
@@ -68,6 +73,14 @@ export const Picker = React.forwardRef(
         : null
       : null;
 
+    const showPalettePresets = type !== "canvasBackground";
+    const [activePalettePreset, setActivePalettePreset] =
+      useState<ColorPalettePresetName>("default");
+    const activePalette =
+      activePalettePreset === "default"
+        ? palette
+        : THEME_COLOR_PALETTES[activePalettePreset];
+
     const [customColors] = React.useState(() => {
       if (type === "canvasBackground") {
         return [];
@@ -81,12 +94,13 @@ export const Picker = React.forwardRef(
 
     const colorObj = getColorNameAndShadeFromColor({
       color,
-      palette,
+      palette: activePalette,
     });
 
     useEffect(() => {
       if (!activeColorPickerSection) {
-        const isCustom = !!color && isCustomColor({ color, palette });
+        const isCustom =
+          !!color && isCustomColor({ color, palette: activePalette });
         const isCustomButNotInList = isCustom && !customColors.includes(color);
 
         setActiveColorPickerSection(
@@ -101,8 +115,8 @@ export const Picker = React.forwardRef(
       }
     }, [
       activeColorPickerSection,
+      activePalette,
       color,
-      palette,
       setActiveColorPickerSection,
       colorObj,
       customColors,
@@ -146,7 +160,7 @@ export const Picker = React.forwardRef(
             const handled = colorPickerKeyNavHandler({
               event,
               activeColorPickerSection,
-              palette,
+              palette: activePalette,
               color,
               onChange,
               onEyeDropperToggle,
@@ -155,6 +169,7 @@ export const Picker = React.forwardRef(
               updateData,
               activeShade,
               onEscape,
+              showPalettePresets,
             });
 
             if (handled) {
@@ -167,6 +182,17 @@ export const Picker = React.forwardRef(
           tabIndex={-1}
         >
           {title && <div className="color-picker__title">{title}</div>}
+
+          {showPalettePresets && (
+            <PalettePresets
+              activePalette={activePalettePreset}
+              defaultPalette={palette}
+              onSelect={(palettePreset) => {
+                setActivePalettePreset(palettePreset);
+                setActiveColorPickerSection("baseColors");
+              }}
+            />
+          )}
 
           {!!customColors.length && (
             <div>
@@ -186,7 +212,7 @@ export const Picker = React.forwardRef(
             <PickerHeading>{t("colorPicker.colors")}</PickerHeading>
             <PickerColorList
               color={color}
-              palette={palette}
+              palette={activePalette}
               onChange={onChange}
               activeShade={activeShade}
               showHotKey={showHotKey}
@@ -198,7 +224,7 @@ export const Picker = React.forwardRef(
             <ShadeList
               color={color}
               onChange={onChange}
-              palette={palette}
+              palette={activePalette}
               showHotKey={showHotKey}
             />
           </div>
