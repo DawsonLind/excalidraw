@@ -2,8 +2,8 @@ import {
   FRAME_STYLE,
   MAX_DECIMALS_FOR_SVG_EXPORT,
   SVG_NS,
-  THEME,
   DARK_THEME_FILTER,
+  isDarkTheme,
   getFontFamilyString,
   isRTL,
   isTestEnv,
@@ -397,7 +397,7 @@ const renderElementToSvg = (
             "fill",
             applyDarkModeFilter(
               element.strokeColor,
-              renderConfig.theme === THEME.DARK,
+              isDarkTheme(renderConfig.theme),
             ),
           );
           path.setAttribute("d", shape);
@@ -533,7 +533,7 @@ const renderElementToSvg = (
         const g = svgRoot.ownerDocument.createElementNS(SVG_NS, "g");
 
         if (
-          renderConfig.theme === THEME.DARK &&
+          isDarkTheme(renderConfig.theme) &&
           fileData.mimeType === MIME_TYPES.svg
         ) {
           g.setAttribute("filter", DARK_THEME_FILTER);
@@ -633,7 +633,7 @@ const renderElementToSvg = (
           "stroke",
           applyDarkModeFilter(
             FRAME_STYLE.strokeColor,
-            renderConfig.theme === THEME.DARK,
+            isDarkTheme(renderConfig.theme),
           ),
         );
         rect.setAttribute("stroke-width", FRAME_STYLE.strokeWidth.toString());
@@ -690,7 +690,7 @@ const renderElementToSvg = (
             "fill",
             applyDarkModeFilter(
               element.strokeColor,
-              renderConfig.theme === THEME.DARK,
+              isDarkTheme(renderConfig.theme),
             ),
           );
           text.setAttribute("text-anchor", textAnchor);

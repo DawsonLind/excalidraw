@@ -60,12 +60,30 @@
     <!--   to minimize white flash on load when user has dark mode enabled   -->
     <script>
       try {
+        // This runs before the bundle, so the theme registry can't be
+        // imported. Mirrors every dark-appearance theme and its background
+        // from THEME_REGISTRY in packages/common/src/constants.ts; the two are
+        // kept in sync by excalidraw-app/tests/indexHtmlTheme.test.ts.
+        var DARK_THEME_BACKGROUNDS = {
+          dark: "#121212",
+          midnight: "#0b1220",
+          forest: "#10160f",
+        };
+
+        function getDarkThemeBackground(theme) {
+          return Object.prototype.hasOwnProperty.call(
+            DARK_THEME_BACKGROUNDS,
+            theme,
+          )
+            ? DARK_THEME_BACKGROUNDS[theme]
+            : null;
+        }
+
         function setTheme(theme) {
-          if (theme === "dark") {
-            document.documentElement.classList.add("dark");
-          } else {
-            document.documentElement.classList.remove("dark");
-          }
+          const background = getDarkThemeBackground(theme);
+
+          document.documentElement.classList.toggle("dark", !!background);
+          document.documentElement.style.backgroundColor = background || "";
         }
 
         function getTheme() {

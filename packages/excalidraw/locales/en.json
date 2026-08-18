@@ -132,7 +132,7 @@
     "showStroke": "Show stroke color picker",
     "showBackground": "Show background color picker",
     "showFonts": "Show font picker",
-    "toggleTheme": "Toggle light/dark theme",
+    "toggleTheme": "Change theme",
     "theme": "Theme",
     "personalLib": "Personal Library",
     "excalidrawLib": "Excalidraw Library",
@@ -746,5 +746,13 @@
     "spacebar": "Space",
     "delete": "Delete",
     "mmb": "Scroll wheel"
+  },
+  "themes": {
+    "light": "Light",
+    "dark": "Dark",
+    "paper": "Paper",
+    "highContrast": "High contrast",
+    "midnight": "Midnight",
+    "forest": "Forest"
   }
 }

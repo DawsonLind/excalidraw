@@ -2,7 +2,7 @@ import {
   applyDarkModeFilter,
   COLOR_WHITE,
   FRAME_STYLE,
-  THEME,
+  getThemeAppearance,
   throttleRAF,
 } from "@excalidraw/common";
 import { isElementLink } from "@excalidraw/element";
@@ -44,11 +44,11 @@ import type {
 import type { StaticCanvasAppState, Zoom } from "../types";
 
 const GridLineColor = {
-  [THEME.LIGHT]: {
+  light: {
     bold: "#dddddd",
     regular: "#e5e5e5",
   },
-  [THEME.DARK]: {
+  dark: {
     bold: applyDarkModeFilter("#dddddd"),
     regular: applyDarkModeFilter("#e5e5e5"),
   },
@@ -99,9 +99,8 @@ const strokeGrid = (
 
     context.beginPath();
     context.setLineDash(isBold ? [] : lineDash);
-    context.strokeStyle = isBold
-      ? GridLineColor[theme].bold
-      : GridLineColor[theme].regular;
+    const gridColors = GridLineColor[getThemeAppearance(theme)];
+    context.strokeStyle = isBold ? gridColors.bold : gridColors.regular;
     context.moveTo(x, offsetY - gridSize);
     context.lineTo(x, Math.ceil(offsetY + height + gridSize * 2));
     context.stroke();
@@ -120,9 +119,8 @@ const strokeGrid = (
 
     context.beginPath();
     context.setLineDash(isBold ? [] : lineDash);
-    context.strokeStyle = isBold
-      ? GridLineColor[theme].bold
-      : GridLineColor[theme].regular;
+    const gridColors = GridLineColor[getThemeAppearance(theme)];
+    context.strokeStyle = isBold ? gridColors.bold : gridColors.regular;
     context.moveTo(offsetX - gridSize, y);
     context.lineTo(Math.ceil(offsetX + width + gridSize * 2), y);
     context.stroke();

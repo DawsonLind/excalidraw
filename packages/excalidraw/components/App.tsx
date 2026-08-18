@@ -47,6 +47,8 @@ import {
   TAP_TWICE_TIMEOUT,
   TEXT_TO_CENTER_SNAP_THRESHOLD,
   THEME,
+  getThemeClassNames,
+  isDarkTheme,
   TOUCH_CTX_MENU_TIMEOUT,
   VERTICAL_ALIGN,
   YOUTUBE_STATES,
@@ -803,7 +805,7 @@ class App extends React.Component<AppProps, AppState> {
     this.state = {
       ...defaultAppState,
       theme,
-      exportWithDarkMode: theme === THEME.DARK,
+      exportWithDarkMode: isDarkTheme(theme),
       isLoading: true,
       ...this.getCanvasOffsets(),
       viewModeEnabled,
@@ -1622,7 +1624,7 @@ class App extends React.Component<AppProps, AppState> {
                         width: 100%;
                         height: 100%;
                         color: ${
-                          this.state.theme === THEME.DARK ? "white" : "black"
+                          isDarkTheme(this.state.theme) ? "white" : "black"
                         };
                       }
                       body {
@@ -1928,7 +1930,7 @@ class App extends React.Component<AppProps, AppState> {
       return null;
     }
 
-    const isDarkTheme = this.state.theme === THEME.DARK;
+    const darkAppearance = isDarkTheme(this.state.theme);
     const nonDeletedFramesLikes = this.scene.getNonDeletedFramesLikes();
 
     const focusedSearchMatch =
@@ -2000,7 +2002,7 @@ class App extends React.Component<AppProps, AppState> {
             style={{
               background: applyDarkModeFilter(
                 this.state.viewBackgroundColor,
-                isDarkTheme,
+                darkAppearance,
               ),
               zIndex: 2,
               border: "none",
@@ -2011,7 +2013,7 @@ class App extends React.Component<AppProps, AppState> {
               fontFamily: "Assistant",
               fontSize: `${FRAME_STYLE.nameFontSize}px`,
               transform: `translate(-${FRAME_NAME_EDIT_PADDING}px, ${FRAME_NAME_EDIT_PADDING}px)`,
-              color: isDarkTheme
+              color: darkAppearance
                 ? FRAME_STYLE.nameColorDarkTheme
                 : FRAME_STYLE.nameColorLightTheme,
               overflow: "hidden",
@@ -2051,7 +2053,7 @@ class App extends React.Component<AppProps, AppState> {
             left: `${x1 - this.state.offsetLeft}px`,
             zIndex: 2,
             fontSize: FRAME_STYLE.nameFontSize,
-            color: isDarkTheme
+            color: darkAppearance
               ? FRAME_STYLE.nameColorDarkTheme
               : FRAME_STYLE.nameColorLightTheme,
             lineHeight: FRAME_STYLE.nameLineHeight,
@@ -2143,12 +2145,16 @@ class App extends React.Component<AppProps, AppState> {
     return (
       <div
         translate="no"
-        className={clsx("excalidraw excalidraw-container notranslate", {
-          "excalidraw--view-mode":
-            this.state.viewModeEnabled ||
-            this.state.openDialog?.name === "elementLinkSelector",
-          "excalidraw--mobile": this.editorInterface.formFactor === "phone",
-        })}
+        className={clsx(
+          "excalidraw excalidraw-container notranslate",
+          getThemeClassNames(this.state.theme),
+          {
+            "excalidraw--view-mode":
+              this.state.viewModeEnabled ||
+              this.state.openDialog?.name === "elementLinkSelector",
+            "excalidraw--mobile": this.editorInterface.formFactor === "phone",
+          },
+        )}
         style={{
           ["--ui-pointerEvents" as any]: shouldBlockPointerEvents
             ? POINTER_EVENTS.disabled
@@ -3409,8 +3415,9 @@ class App extends React.Component<AppProps, AppState> {
     const elements = this.scene.getElementsIncludingDeleted();
     const elementsMap = this.scene.getElementsMapIncludingDeleted();
 
-    const shouldExportWithDarkMode =
-      (this.sessionExportThemeOverride ?? this.state.theme) === THEME.DARK;
+    const shouldExportWithDarkMode = isDarkTheme(
+      this.sessionExportThemeOverride ?? this.state.theme,
+    );
 
     if (this.state.exportWithDarkMode !== shouldExportWithDarkMode) {
       this.setState({ exportWithDarkMode: shouldExportWithDarkMode });
@@ -3520,11 +3527,6 @@ class App extends React.Component<AppProps, AppState> {
     if (prevProps.theme !== this.props.theme && this.props.theme) {
       this.setState({ theme: this.props.theme });
     }
-
-    this.excalidrawContainerRef.current?.classList.toggle(
-      "theme--dark",
-      this.state.theme === THEME.DARK,
-    );
 
     if (
       this.state.selectedLinearElement?.isEditing &&

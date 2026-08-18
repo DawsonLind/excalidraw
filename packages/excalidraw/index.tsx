@@ -347,6 +347,8 @@ export { isLinearElement } from "@excalidraw/element";
 export {
   FONT_FAMILY,
   THEME,
+  isDarkTheme,
+  parseTheme,
   MIME_TYPES,
   ROUNDNESS,
   DEFAULT_LASER_COLOR,

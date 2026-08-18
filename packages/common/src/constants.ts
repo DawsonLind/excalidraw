@@ -189,7 +189,103 @@ export const getFontFamilyFallbacks = (
 export const THEME = {
   LIGHT: "light",
   DARK: "dark",
+  PAPER: "paper",
+  HIGH_CONTRAST: "high-contrast",
+  MIDNIGHT: "midnight",
+  FOREST: "forest",
 } as const;
+
+export type ThemeAppearance = "light" | "dark";
+
+type ThemeValue = typeof THEME[keyof typeof THEME];
+
+export const THEME_REGISTRY = {
+  [THEME.LIGHT]: {
+    appearance: "light",
+    labelKey: "themes.light",
+    swatch: "#ffffff",
+  },
+  [THEME.DARK]: {
+    appearance: "dark",
+    labelKey: "themes.dark",
+    swatch: "#121212",
+  },
+  [THEME.PAPER]: {
+    appearance: "light",
+    labelKey: "themes.paper",
+    swatch: "#f4ead5",
+  },
+  [THEME.HIGH_CONTRAST]: {
+    appearance: "light",
+    labelKey: "themes.highContrast",
+    swatch: "#000000",
+  },
+  [THEME.MIDNIGHT]: {
+    appearance: "dark",
+    labelKey: "themes.midnight",
+    swatch: "#0b1220",
+  },
+  [THEME.FOREST]: {
+    appearance: "dark",
+    labelKey: "themes.forest",
+    swatch: "#10160f",
+  },
+} as const;
+
+export const THEME_IDS = [
+  THEME.LIGHT,
+  THEME.DARK,
+  THEME.PAPER,
+  THEME.HIGH_CONTRAST,
+  THEME.MIDNIGHT,
+  THEME.FOREST,
+] as const;
+
+const THEME_PALETTE_IDS = THEME_IDS.filter(
+  (id): id is Exclude<ThemeValue, "light" | "dark"> =>
+    id !== THEME.LIGHT && id !== THEME.DARK,
+);
+
+export const isTheme = (value: unknown): value is ThemeValue =>
+  typeof value === "string" && value in THEME_REGISTRY;
+
+export const parseTheme = (
+  value: unknown,
+  fallback: ThemeValue = THEME.LIGHT,
+): ThemeValue => (isTheme(value) ? value : fallback);
+
+export const getThemeAppearance = (theme: unknown): ThemeAppearance =>
+  THEME_REGISTRY[parseTheme(theme)].appearance;
+
+export const isDarkTheme = (theme: unknown): boolean =>
+  getThemeAppearance(theme) === "dark";
+
+export const getNextTheme = (theme: unknown): ThemeValue => {
+  const current = parseTheme(theme);
+  const index = THEME_IDS.indexOf(current);
+  return THEME_IDS[(index + 1) % THEME_IDS.length];
+};
+
+export const getThemeClassNames = (theme: unknown): string[] => {
+  const parsed = parseTheme(theme);
+  const classNames: string[] = [];
+  if (isDarkTheme(parsed)) {
+    classNames.push("theme--dark");
+  }
+  if (parsed !== THEME.LIGHT && parsed !== THEME.DARK) {
+    classNames.push(`theme--${parsed}`);
+  }
+  return classNames;
+};
+
+export const applyThemeClasses = (element: Element, theme: unknown) => {
+  const next = new Set(getThemeClassNames(theme));
+  element.classList.toggle("theme--dark", next.has("theme--dark"));
+  for (const id of THEME_PALETTE_IDS) {
+    const className = `theme--${id}`;
+    element.classList.toggle(className, next.has(className));
+  }
+};
 
 export const DARK_THEME_FILTER = "invert(93%) hue-rotate(180deg)";
 
