@@ -103,8 +103,14 @@ describe("shortcuts", () => {
     Keyboard.keyPress(KEYS.W);
 
     expect(window.h.state.activeTool.type).toBe("triangle");
-    expect(
-      container.querySelector('[data-testid="toolbar-triangle"]'),
-    ).toHaveAttribute("title", "Triangle — W");
+    const triangleTool = container.querySelector(
+      '[data-testid="toolbar-triangle"]',
+    )!;
+
+    expect(triangleTool).toHaveAttribute("aria-keyshortcuts", "W");
+    expect(triangleTool.closest("label")).toHaveAttribute(
+      "title",
+      "Triangle — W",
+    );
   });
 });
