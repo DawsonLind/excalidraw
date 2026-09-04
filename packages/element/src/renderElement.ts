@@ -396,7 +396,8 @@ const drawElementOnCanvas = (
     case "embeddable":
     case "diamond":
     case "ellipse":
-    case "heart": {
+    case "heart":
+    case "callout": {
       context.lineJoin = "round";
       context.lineCap = "round";
 
@@ -881,6 +882,7 @@ export const renderElement = (
     }
     case "rectangle":
     case "diamond":
+    case "callout":
     case "ellipse":
     case "heart":
     case "line":
