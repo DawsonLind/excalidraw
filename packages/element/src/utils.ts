@@ -473,10 +473,7 @@ export function deconstructTriangleElement(
     x + width + offset,
     y + height + offset,
   );
-  const bottomLeft = pointFrom<GlobalPoint>(
-    x - offset,
-    y + height + offset,
-  );
+  const bottomLeft = pointFrom<GlobalPoint>(x - offset, y + height + offset);
 
   const sides = [
     lineSegment(top, bottomRight),
