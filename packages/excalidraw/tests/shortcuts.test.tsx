@@ -98,10 +98,13 @@ describe("shortcuts", () => {
   });
 
   it("triangle tool should be selectable via its own shortcut", async () => {
-    await render(<Excalidraw handleKeyboardGlobally />);
+    const { container } = await render(<Excalidraw handleKeyboardGlobally />);
 
     Keyboard.keyPress(KEYS.W);
 
     expect(window.h.state.activeTool.type).toBe("triangle");
+    expect(
+      container.querySelector('[data-testid="toolbar-triangle"]'),
+    ).toHaveAttribute("title", "Triangle — W");
   });
 });
