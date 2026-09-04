@@ -396,6 +396,7 @@ const drawElementOnCanvas = (
     case "embeddable":
     case "diamond":
     case "ellipse":
+    case "triangle":
     case "heart": {
       context.lineJoin = "round";
       context.lineCap = "round";
@@ -881,6 +882,7 @@ export const renderElement = (
     }
     case "rectangle":
     case "diamond":
+    case "triangle":
     case "ellipse":
     case "heart":
     case "line":

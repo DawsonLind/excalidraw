@@ -7,6 +7,7 @@ export const hasBackground = (type: ElementOrToolType) =>
   type === "ellipse" ||
   type === "diamond" ||
   type === "heart" ||
+  type === "triangle" ||
   type === "line" ||
   type === "freedraw";
 
@@ -15,6 +16,7 @@ export const hasStrokeColor = (type: ElementOrToolType) =>
   type === "ellipse" ||
   type === "diamond" ||
   type === "heart" ||
+  type === "triangle" ||
   type === "freedraw" ||
   type === "arrow" ||
   type === "line" ||
@@ -28,6 +30,7 @@ export const hasStrokeWidth = (type: ElementOrToolType) =>
   type === "ellipse" ||
   type === "diamond" ||
   type === "heart" ||
+  type === "triangle" ||
   type === "freedraw" ||
   type === "arrow" ||
   type === "line";
@@ -39,6 +42,7 @@ export const hasStrokeStyle = (type: ElementOrToolType) =>
   type === "ellipse" ||
   type === "diamond" ||
   type === "heart" ||
+  type === "triangle" ||
   type === "arrow" ||
   type === "line";
 

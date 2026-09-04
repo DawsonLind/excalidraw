@@ -6,6 +6,7 @@ import {
   DiamondIcon,
   EllipseIcon,
   HeartIcon,
+  TriangleIcon,
   ArrowIcon,
   LineIcon,
   FreedrawIcon,
@@ -62,7 +63,16 @@ export const SHAPES = [
   {
     icon: HeartIcon,
     value: "heart",
-    key: KEYS.G,
+    key: KEYS.C,
+    numericKey: null,
+    fillable: true,
+    toolbar: true,
+  },
+  {
+    icon: TriangleIcon,
+    value: "triangle",
+    // `G` is taken by the background color picker
+    key: KEYS.W,
     numericKey: null,
     fillable: true,
     toolbar: true,

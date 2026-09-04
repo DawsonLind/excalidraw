@@ -88,6 +88,7 @@ import {
   HeartIcon,
   LineIcon,
   RectangleIcon,
+  TriangleIcon,
   roundArrowIcon,
   sharpArrowIcon,
 } from "./icons";
@@ -107,7 +108,13 @@ type ExcalidrawConvertibleElement =
   | ExcalidrawLinearElement;
 
 // indicates order of switching
-const GENERIC_TYPES = ["rectangle", "diamond", "ellipse", "heart"] as const;
+const GENERIC_TYPES = [
+  "rectangle",
+  "diamond",
+  "ellipse",
+  "heart",
+  "triangle",
+] as const;
 // indicates order of switching
 const LINEAR_TYPES = [
   "line",
@@ -307,6 +314,7 @@ const Panel = ({
           ["diamond", DiamondIcon],
           ["ellipse", EllipseIcon],
           ["heart", HeartIcon],
+          ["triangle", TriangleIcon],
         ]
       : [];
 
